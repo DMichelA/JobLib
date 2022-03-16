@@ -1,8 +1,8 @@
-import { 
-    IonContent, 
-    IonGrid, 
-    IonPage, 
-    IonRow, 
+import {
+    IonContent,
+    IonGrid,
+    IonPage,
+    IonRow,
     IonCol,
     IonImg,
     IonButton,
@@ -12,8 +12,42 @@ import {
 } from "@ionic/react";
 import React from "react";
 import { logoGoogle, personAdd } from "ionicons/icons";
+import { getAuth, GoogleAuthProvider,signInWithPopup } from "firebase/auth";
+import firebase from "../database/Firebase";
+import { getFirestore, collection, getDocs,addDoc } from 'firebase/firestore/lite';
 
 const SignUp: React.FC = () => {
+    async function LoginWithGoogle(){
+        const provider = new GoogleAuthProvider();
+        console.log(provider);
+        await signInWithPopup(getAuth(),provider).then(res=>{
+            console.log(res)
+        })
+    }
+    async function insertar(correo:any,contra:any){
+        
+        const db = getFirestore();
+        try {
+            const docRef = await addDoc(collection(db, "correos"), {
+              correo: correo,
+              password: contra,
+            });
+            console.log("Document written with ID: ", docRef.id);
+          } catch (e) {
+            console.error("Error adding document: ", e);
+          }
+    }
+    async function Select() {
+        const db = getFirestore();
+        const coleccion = collection(db, 'correos');
+        
+        const correos = await getDocs(coleccion);
+        
+        const listaDatos = correos.docs.map(doc => doc.data());
+        console.log(listaDatos)
+        return listaDatos;
+    }
+    
     return (
         <IonPage>
             <IonContent fullscreen>
@@ -30,8 +64,10 @@ const SignUp: React.FC = () => {
                     </IonRow>
                     <IonRow className="ion-justify-content-center">
                         <IonCol>
-                            <IonButton expand="block">
-                                <IonIcon slot="start" icon={logoGoogle}/>
+                            <IonButton onClick={function(){
+                                LoginWithGoogle();
+                            }} expand="block">
+                                <IonIcon slot="start" icon={logoGoogle} />
                                 Crear cuenta con Google
                             </IonButton>
                         </IonCol>
@@ -42,7 +78,7 @@ const SignUp: React.FC = () => {
                         <IonCol>
                             <p>Correo electronico:</p>
                             <IonItem>
-                                <IonInput name="email" type="text" placeholder="Ingresa tu correo electronico"></IonInput>
+                                <IonInput id="email" name="email" type="text" placeholder="Ingresa tu correo electronico"></IonInput>
                             </IonItem>
                         </IonCol>
                     </IonRow>
@@ -50,14 +86,20 @@ const SignUp: React.FC = () => {
                         <IonCol>
                             <p>Contraseña:</p>
                             <IonItem>
-                                <IonInput name="password" type="password" placeholder="Ingresa tu contraseña"></IonInput>
+                                <IonInput id="contra" name="password" type="password" placeholder="Ingresa tu contraseña"></IonInput>
                             </IonItem>
                         </IonCol>
                     </IonRow>
                     <IonRow className="ion-text-center ion-justify-content-center">
                         <IonCol>
-                            <IonButton>
-                                <IonIcon slot="start" icon={personAdd}/>
+                            <IonButton onClick={ function(){
+                                    let correo=(document.getElementById("email")as HTMLInputElement)?.value
+                                    let contra=(document.getElementById("contra")as HTMLInputElement)?.value
+                                    
+                                    insertar(correo,contra);
+                                    Select();
+                                } }>
+                                <IonIcon slot="start" icon={personAdd} />
                                 Crear cuenta
                             </IonButton>
                         </IonCol>
@@ -69,3 +111,6 @@ const SignUp: React.FC = () => {
 };
 
 export default SignUp;
+
+
+ 
