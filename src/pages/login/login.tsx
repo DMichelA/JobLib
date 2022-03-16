@@ -161,7 +161,7 @@ const Login: React.FC = () => {
 
 const AlertExample: React.FC = () => {
     const [present] = useIonAlert();
-    present('Usuario OContraseña incorrectos', [{ text: 'Ok' }])
+    present('Usuario O  Contraseña incorrectos', [{ text: 'Ok' }])
    return null
 }
 export default Login;
