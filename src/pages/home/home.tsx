@@ -31,7 +31,7 @@ const Home: React.FC = () => {
                         <IonRow className="ion-text-center ion-justify-content-center">
                             <IonRouterLink>
                                 <IonCol>
-                                    <IonButton expand="block">COMENZAR</IonButton>
+                                    <IonButton href="/login" expand="block">COMENZAR</IonButton>
                                 </IonCol>
                             </IonRouterLink>
                         </IonRow>
@@ -47,7 +47,7 @@ const Home: React.FC = () => {
                     </IonRow>
                     <IonRow className="ion-text-center ion-justify-content-center">
                         <IonCol>
-                            <IonRouterLink href="#" class="underline">Registrarse</IonRouterLink>
+                            <IonRouterLink href="/signup" class="underline">Registrarse</IonRouterLink>
                         </IonCol>
                     </IonRow>
                 </IonGrid>
