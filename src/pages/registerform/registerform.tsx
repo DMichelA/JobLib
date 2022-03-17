@@ -13,12 +13,26 @@ import {
     IonDatetime,
     IonSelect,
     IonSelectOption,
+    IonButton,
+    IonIcon,
+    IonPopover,
+    IonText,
+    IonAvatar,
 } from "@ionic/react";
 import React from "react";
-import { logoGoogle, personAdd } from "ionicons/icons";
+import { arrowForwardCircle, calendar, camera } from "ionicons/icons";
+import { useState } from "react";
+import { format, parseISO } from "date-fns";
 
 
 const RegisterForm: React.FC = () => {
+
+    const [popoverDate, setPopoverDate] = useState('');
+
+    const formatDate = (value: string) => {
+        return format(parseISO(value), 'MMM dd yyyy');
+    };
+
     return (
         <IonPage>
         <IonHeader>
@@ -30,7 +44,15 @@ const RegisterForm: React.FC = () => {
             <IonGrid>
             <IonRow>
                 <IonCol>
-                    <h5>Llenar los siguientes campos</h5>
+                    <IonTitle>Llena los siguientes campos</IonTitle>
+                </IonCol>
+            </IonRow>
+            <IonRow class="ion-text-center ion-justify-content-center">
+                <IonCol>
+                    <IonButton>
+                        <IonIcon slot="start" icon={camera}/>
+                        Seleccionar una Imagen
+                    </IonButton>
                 </IonCol>
             </IonRow>
             <IonRow>
@@ -67,8 +89,17 @@ const RegisterForm: React.FC = () => {
             </IonRow>
             <IonRow>
                 <IonCol>
+                <IonItem button={true} id="open-date-input">
                     <IonLabel>Fecha de Nacimiento</IonLabel>
-                    <IonDatetime presentation="date" placeholder="Fecha de Nacimiento"/>
+                    <IonText slot="end">{popoverDate}</IonText>
+                    <IonIcon icon={calendar} />
+                    <IonPopover trigger="open-date-input" showBackdrop={false}>
+                    <IonDatetime
+                        presentation="date"
+                        onIonChange={ev => setPopoverDate(formatDate(ev.detail.value!))}
+                    />
+                    </IonPopover>
+                </IonItem>
                 </IonCol>
             </IonRow>
             <IonRow>
@@ -90,12 +121,20 @@ const RegisterForm: React.FC = () => {
             <IonRow>
                 <IonCol>
                     <IonItem>
-                        <IonLabel>Tipo persona...</IonLabel>
+                        <IonLabel>Selecciona</IonLabel>
                         <IonSelect>
                             <IonSelectOption value="empleado">Empleado</IonSelectOption>
                             <IonSelectOption value="empleador">Empleador</IonSelectOption>
                         </IonSelect>
                     </IonItem>
+                </IonCol>
+            </IonRow>
+            <IonRow class="ion-text-end ion-justify-content-end">
+                <IonCol>
+                    <IonButton>
+                        <IonIcon slot="start" icon={arrowForwardCircle}/>
+                        Siguiente
+                    </IonButton>
                 </IonCol>
             </IonRow>
             </IonGrid>
