@@ -14,69 +14,65 @@ import {
 } from "@ionic/react";
 import React, { useState } from "react";
 import { logoGoogle, logIn } from "ionicons/icons";
-
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 //import  firebase from 'firebase/compat/app';
 import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 
+
 const Login: React.FC = () => {
-    function vinculacion() {
-        console.error(firebase);
-        const db = getFirestore();
-        let todo = Select();
-
+    const db = getFirestore();
+    Select();
+    async function LoginWithGoogle() {
+        const provider = new GoogleAuthProvider();
+        console.log(provider);
+        await signInWithPopup(getAuth(), provider).then(res => {
+            console.log(res)
+        })
     }
-
-
-
     async function Select() {
+        
         const db = getFirestore();
         const coleccion = collection(db, 'correos');
 
         const correos = await getDocs(coleccion);
 
         const listaDatos = correos.docs.map(doc => doc.data());
-
+        console.log(listaDatos)
         return listaDatos;
     }
 
-    function authenticationWithEmailAndPassword(correo: any, contrasena: any) {
+    async function authenticationWithEmailAndPassword(correo: any, contrasena: any) {
         console.log(correo);
         console.log(contrasena);
-        var estado=false;
-        let datos = Select();
-        datos.then(datos => {
-            console.log(datos)
-            for (const dato in datos) {
-                console.log(dato)
-                let user = (JSON.stringify(datos[dato]['correo'])).toString();
-                let pw = (JSON.stringify(datos[dato]['password'])).toString();
-                user = user.substring(1, user.length - 1);
-                pw = pw.substring(1, pw.length - 1);
-
-                console.log(user);
-                console.log(pw);
-                if (user == correo && contrasena == pw) {
-                    console.log("el correo existe con el id" + dato);
-                    window.location.href = '/signup';
-
-
+        var estado;
+        let datos = await Select();
+        for (const dato in datos) {
+            let user = (JSON.stringify(datos[dato]['correo'])).toString();
+            let pw = (JSON.stringify(datos[dato]['password'])).toString();
+            user = user.substring(1, user.length - 1);
+            pw = pw.substring(1, pw.length - 1);
+            console.log(user);
+            console.log(pw);
+            if (user == correo) {
+                if (pw == contrasena) {
+                    estado = "correcto";
                 }
                 else {
-                    estado = true;
-
+                    estado = "error pw"
                 }
             }
-        })
+            else {
+                estado = "error email"
+            }
+        }
+        console.log(estado);
         return estado;
+
     }
-
-
-
-
-    vinculacion();
-    const [change, setChange] = useState(false);
+    const [errorPw, seterrorPW] = useState(false);
+    const [errorEm, seterrorEm] = useState(false);
     return (
         <IonPage>
             <IonContent fullscreen>
@@ -93,7 +89,9 @@ const Login: React.FC = () => {
                     </IonRow>
                     <IonRow className="ion-justify-content-center">
                         <IonCol>
-                            <IonButton expand="block" >
+                            <IonButton expand="block" onClick={function () {
+                                LoginWithGoogle();
+                            }}>
                                 <IonIcon slot="start" icon={logoGoogle} />
                                 Iniciar sesion con Google
                             </IonButton>
@@ -119,25 +117,35 @@ const Login: React.FC = () => {
                     </IonRow>
                     <IonRow className="ion-text-center ion-justify-content-center">
                         <IonCol>
-                            <IonButton onClick={function () {
+                            <IonButton onClick={async function () {
                                 let correo = (document.getElementById("email") as HTMLInputElement)?.value
                                 let contra = (document.getElementById("contra") as HTMLInputElement)?.value
-                                let autenticado = authenticationWithEmailAndPassword(correo, contra);
-                                if (!autenticado) {
-                                    setChange(true);
+                                let autenticado = await authenticationWithEmailAndPassword(correo, contra);
+                                console.log(autenticado);
+                                if (autenticado == "error pw") {
+                                    seterrorPW(true);
+                                    seterrorEm(false)
+
+                                }
+                                else if (autenticado == "error email") {
+                                    seterrorEm(true);
+                                    seterrorPW(false)
 
                                 }
                                 else{
-                                    setChange(false);
+                                   
+                                    window.location.href="/signup";
                                 }
+                                console.log(errorEm);
+                                console.log(errorPw);
 
                             }} >
+                                {errorEm && !errorPw ? <CorreoNoRegistrado /> : errorPw && !errorEm ? <ContrasenaIncorrecta /> : null}
 
                                 <IonIcon slot="start" icon={logIn} />
                                 Iniciar sesion
                             </IonButton>
                         </IonCol>
-                        {change ? <AlertExample /> : null}
                     </IonRow>
                 </IonGrid>
             </IonContent>
@@ -150,7 +158,7 @@ const Login: React.FC = () => {
                     </IonRow>
                     <IonRow className="ion-text-center ion-justify-content-center">
                         <IonCol>
-                            <IonRouterLink href="" class="underline">Registrarse</IonRouterLink>
+                            <IonRouterLink href="/signup" class="underline">Registrarse</IonRouterLink>
                         </IonCol>
                     </IonRow>
                 </IonGrid>
@@ -159,10 +167,23 @@ const Login: React.FC = () => {
     );
 };
 
-const AlertExample: React.FC = () => {
+const CorreoNoRegistrado: React.FC = () => {
     const [present] = useIonAlert();
-    present('Usuario O  Contraseña incorrectos', [{ text: 'Ok' }])
-   return null
+    present('Correo no registrado', [{ text: 'Ok' }])
+    setTimeout(function(){
+        window.location.reload()
+    },3000);
+    
+    return null
+}
+
+const ContrasenaIncorrecta: React.FC = () => {
+    const [present] = useIonAlert();
+    present('La contraseña es incorrecta', [{ text: 'Ok' }])
+    setTimeout(function(){
+        window.location.reload()
+    },3000);
+    return null
 }
 export default Login;
 

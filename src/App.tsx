@@ -23,7 +23,15 @@ import './theme/variables.css';
 import Home from './pages/home/home';
 import Login from './pages/login/login';
 import SignUp from './pages/signup/signup';
-
+import DataUser from "./pages/datosUsuario/datosUsuario"
+import InicioEmpleado from "./pages/inicio/inicioEmpleado"
+import InicioEmpleador from "./pages/inicio/inicioEmpleador"
+import AñadirEmpleo from "./pages/añadirEmpleo/añadirEmpleo"
+import VistaEmpleo from "./pages/vistaEmpleo/vistaEmpleo"
+import FiltroEmpleado from "./pages/filtro/filtroempleado"
+import FiltroEmpleador from "./pages/filtro/filtroempleador"
+import Perfil from './pages/perfil/perfil'
+import TrabajosAplicados from './pages/trabajosAplicadosEmpleado/trabajosAplicados'
 setupIonicReact();
 
 const App: React.FC = () => (
@@ -31,8 +39,18 @@ const App: React.FC = () => (
     <IonReactRouter>
       <IonRouterOutlet>
         <Route path="/" component={Home} exact={true}/>
-        <Route path="/login" component={Login} exact={true}/>
+        <Route path="/login"  component={Login} exact={true}/>
         <Route path="/signup" component={SignUp} exact={true}/>
+        <Route path="/datauser" component={DataUser} exact={true}/>
+        <Route path="/inicioempleado" component={InicioEmpleado} exact={true}/>
+        <Route path="/inicioempleador" component={InicioEmpleador} exact={true}/>
+        <Route path="/anadirempleo" component={AñadirEmpleo} exact={true}/>
+        <Route path="/vistaempleo" component={VistaEmpleo} exact={true}/>
+        <Route path="/filtroempleado" component={FiltroEmpleado} exact={true}/>
+        <Route path="/filtroempleador" component={FiltroEmpleador} exact={true}/>
+        <Route path="/perfil" component={Perfil} exact={true}/>
+        <Route path="/trabajosaplicados" component={TrabajosAplicados} exact={true}/>
+
         <Redirect to="/login"/>
       </IonRouterOutlet>
     </IonReactRouter>
