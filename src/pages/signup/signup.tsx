@@ -12,63 +12,33 @@ import {
 } from "@ionic/react";
 import React, { Component, useState } from "react";
 import { logoGoogle, personAdd } from "ionicons/icons";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import firebase from "../database/Firebase";
-import { getFirestore, collection, getDocs, addDoc, setDoc, doc } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, setDoc, doc,where,query } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router-dom";
 
 const SignUp: React.FC = () => {
+    const db = getFirestore()
     console.log(firebase);
     let history = useHistory();
     const auth = getAuth();
     console.log(auth)
     window.onload=async function(){
         
-        let email=await getRedirectResult(auth)
-            .then((result) => {
-                // This gives you a Google Access Token. You can use it to access Google APIs.
-                if (result != null) {
-                    const credential = GoogleAuthProvider.credentialFromResult(result);
-                    console.log(credential);
-                    if (credential != null) {
-                        const token = credential.accessToken;
-                        console.log(token)
-                    }
-    
-                    // The signed-in user info.
-                    const user = result.user;
-    
-                    console.log(user.email)
-                    return user.email
-                }
-    
-            }).catch((error) => {
-                // Handle Errors here.
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                // The email of the user's account used.
-                const email = error.email;
-                // The AuthCredential type that was used.
-                const credential = GoogleAuthProvider.credentialFromError(error);
-                // ...
-            });
-            console.log(email)
-            let alerta=await insertar(email,"unknown");
-            console.log(alerta);
-            if (alerta) {
-                setChange(true);
-            }
-            else {
-                setChange(false);
-            }
-            
+    let email=await getRedirectResult(auth)
+    console.log(email?.user.email);
+    let col=collection(db,"correos");
+    const q = query(col, where("correo", "==",email?.user.email ));
+    const querySnapshot = await getDocs(q);
+    let todoCorre= await Select("correos");
 
+    if(querySnapshot.size==0){
+        redireccionGoogle("/datauser", [todoCorre.length+1, email?.user.email, "#####"]);
     }
-    
-
-    async function decodificadorPromesas(promesa: any) {
-        return await promesa;
+    else{
+        setChange(true);
+    }        
     }
     async function LoginWithGoogle() {
         const provider = new GoogleAuthProvider();
@@ -94,7 +64,7 @@ const SignUp: React.FC = () => {
         //google
         if (contra == "unknown") {
             let correos = Select("correos");
-            console.log(correos);
+            console.log( await correos);
             existe= await correos.then(correos => {
                 let i = 0;
                 for (let i in correos) {
@@ -108,14 +78,11 @@ const SignUp: React.FC = () => {
                     if (userbd == correo) {
                         return true;
                         break;
-
-
                     }
-
-
                 }
-
-            })
+            });
+            
+            
             
         }
         else {
@@ -155,10 +122,7 @@ const SignUp: React.FC = () => {
 
             }
         }
-
         console.log(existe);
-
-
         return existe;
     }
 
@@ -177,6 +141,7 @@ const SignUp: React.FC = () => {
             state: { detail: data }
         })
     }
+   
 
 
     async function Select(tabla: any) {
@@ -189,6 +154,15 @@ const SignUp: React.FC = () => {
         const listaDatos = data.docs.map(doc => doc.data());
         console.log(listaDatos);
         return listaDatos;
+    }
+
+    function redireccionGoogle(ruta: any, datos: any) {
+        let data = datos
+
+        history.push({
+            pathname: ruta,
+            state: { detail: data }
+        })
     }
 
 

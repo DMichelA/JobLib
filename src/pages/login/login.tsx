@@ -14,22 +14,56 @@ import {
 } from "@ionic/react";
 import React, { useState } from "react";
 import { logoGoogle, logIn } from "ionicons/icons";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithRedirect,getRedirectResult } from "firebase/auth";
 //import  firebase from 'firebase/compat/app';
 import firebase from "../database/Firebase";
-import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc,query,where } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
-
+import { useHistory } from "react-router-dom";
 
 const Login: React.FC = () => {
+    let history = useHistory();
+
     const db = getFirestore();
     Select();
+    window.onload=async function(){
+        const auth = getAuth();
+        let email=await getRedirectResult(auth)
+        console.log(email?.user.email);
+        let col=collection(db,"correos");
+        const q = query(col, where("correo", "==",email?.user.email ));
+        const querySnapshot = await getDocs(q);
+        console.log(querySnapshot)    
+        const listaDatos = querySnapshot.docs.map(doc => doc.data());
+       
+        if(querySnapshot.size==0){
+            seterrorNe(true);
+        }
+        else{
+            if(listaDatos[0]['tipoPersona']=="empleado"){
+                redireccion("/inicioempleado",{tipopersona:"empleado",idtipopersona:listaDatos[0]["idTipoPersona"]});
+    
+            }
+            else{
+                redireccion("/inicioempleador",{tipopersona:"empleador",idtipopersona:listaDatos[0]["idTipoPersona"]})
+    
+            }
+             
+        }
+    }
+    function redireccion(ruta: any, datos: any) {
+        let data =datos;
+
+        history.push({
+            pathname: ruta,
+            state: { detail: data }
+        })
+    }
     async function LoginWithGoogle() {
         const provider = new GoogleAuthProvider();
         console.log(provider);
-        await signInWithPopup(getAuth(), provider).then(res => {
-            console.log(res)
-        })
+        const auth = getAuth();
+        await signInWithRedirect(auth, provider)
     }
     async function Select() {
         
@@ -48,6 +82,10 @@ const Login: React.FC = () => {
         console.log(contrasena);
         var estado;
         let datos = await Select();
+        console.log(datos);
+        if(datos.length==0){
+            estado="error NE"//NO EXISTENTE
+        }
         for (const dato in datos) {
             let user = (JSON.stringify(datos[dato]['correo'])).toString();
             let pw = (JSON.stringify(datos[dato]['password'])).toString();
@@ -73,6 +111,8 @@ const Login: React.FC = () => {
     }
     const [errorPw, seterrorPW] = useState(false);
     const [errorEm, seterrorEm] = useState(false);
+    const [errorNe, seterrorNe] = useState(false);
+
     return (
         <IonPage>
             <IonContent fullscreen>
@@ -125,22 +165,27 @@ const Login: React.FC = () => {
                                 if (autenticado == "error pw") {
                                     seterrorPW(true);
                                     seterrorEm(false)
+                                    seterrorNe(false);
 
                                 }
                                 else if (autenticado == "error email") {
                                     seterrorEm(true);
                                     seterrorPW(false)
+                                    seterrorNe(false);
 
                                 }
-                                else{
-                                   
-                                    window.location.href="/signup";
+                                else if(autenticado=="error NE"){
+                                    seterrorNe(true);
+                                    seterrorPW(false);
+                                    seterrorEm(false)
                                 }
+
                                 console.log(errorEm);
                                 console.log(errorPw);
+                                console.log(errorNe);
 
                             }} >
-                                {errorEm && !errorPw ? <CorreoNoRegistrado /> : errorPw && !errorEm ? <ContrasenaIncorrecta /> : null}
+                                {errorNe?<CorreoNoRegistrado />:errorEm && !errorPw ? <CorreoNoRegistrado /> : errorPw && !errorEm ? <ContrasenaIncorrecta /> : null}
 
                                 <IonIcon slot="start" icon={logIn} />
                                 Iniciar sesion
@@ -176,6 +221,7 @@ const CorreoNoRegistrado: React.FC = () => {
     
     return null
 }
+
 
 const ContrasenaIncorrecta: React.FC = () => {
     const [present] = useIonAlert();

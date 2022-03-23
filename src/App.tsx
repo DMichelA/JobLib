@@ -26,7 +26,7 @@ import SignUp from './pages/signup/signup';
 import DataUser from "./pages/datosUsuario/datosUsuario"
 import InicioEmpleado from "./pages/inicio/inicioEmpleado"
 import InicioEmpleador from "./pages/inicio/inicioEmpleador"
-import AñadirEmpleo from "./pages/añadirEmpleo/añadirEmpleo"
+import AnadirEmpleo from "./pages/anadirEmpleo/anadirEmpleo"
 import VistaEmpleo from "./pages/vistaEmpleo/vistaEmpleo"
 import FiltroEmpleado from "./pages/filtro/filtroempleado"
 import FiltroEmpleador from "./pages/filtro/filtroempleador"
@@ -44,7 +44,7 @@ const App: React.FC = () => (
         <Route path="/datauser" component={DataUser} exact={true}/>
         <Route path="/inicioempleado" component={InicioEmpleado} exact={true}/>
         <Route path="/inicioempleador" component={InicioEmpleador} exact={true}/>
-        <Route path="/anadirempleo" component={AñadirEmpleo} exact={true}/>
+        <Route path="/anadirempleo" component={AnadirEmpleo} exact={true}/>
         <Route path="/vistaempleo" component={VistaEmpleo} exact={true}/>
         <Route path="/filtroempleado" component={FiltroEmpleado} exact={true}/>
         <Route path="/filtroempleador" component={FiltroEmpleador} exact={true}/>

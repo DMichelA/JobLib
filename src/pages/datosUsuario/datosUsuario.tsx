@@ -19,7 +19,7 @@ import React, { useState } from "react";
 import { logoGoogle, personAdd } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
-import { getFirestore, collection, getDocs, addDoc, doc, setDoc } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, doc, setDoc,query, where } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router";
 
@@ -29,13 +29,7 @@ const DataUser: React.FC = () => {
     const auth = getAuth();
     const user = auth.currentUser;
     console.log(user);
-    async function LoginWithGoogle() {
-        const provider = new GoogleAuthProvider();
-        console.log(provider);
-        await signInWithPopup(getAuth(), provider).then(res => {
-            console.log(res)
-        })
-    }
+    
 
     async function Select(tabla: any) {
 
@@ -48,20 +42,40 @@ const DataUser: React.FC = () => {
         console.log(listaDatos)
         return listaDatos;
     }
+    function redireccion(ruta: any, datos: any) {
+        let data = {
+            idcorreo: datos[0],
+            correo: datos[1],
+            password: datos[2],
+
+        }
+
+        history.push({
+            pathname: ruta,
+            state: { detail: data }
+        })
+    }
+    function redireccionGoogle(ruta: any, datos: any) {
+        let data =datos;
+
+        history.push({
+            pathname: ruta,
+            state: { detail: data }
+        })
+    }
 
     async function insercion(nombre: any, apell1: any, apell2: any, dom: any, fecnac: any, sueldo: any, numcel: any, tipoPersona: any) {
         let data = history.location.state;
         data = Object(JSON.parse(JSON.stringify(data))['detail'])
         console.log(data)
-        let correo = (Object(data)['correo']).toString();
+        let correo = (Object(data)[1]).toString();
 
-        let contrasena = (Object(data)['password']).toString();
-        let idc = (Object(data)['idcorreo']).toString();
+        let contrasena = (Object(data)[2]).toString();
+        let idc = (Object(data)[0]).toString();
         console.log(correo + " " + contrasena + " " + idc);
 
         const db = getFirestore();
-
-
+        
         try {
 
             if (tipoPersona == "empleado") {
@@ -69,114 +83,152 @@ const DataUser: React.FC = () => {
                 console.log(todoEmpleado);
                 console.log(todoEmpleado.length);
                 console.log(todoEmpleado.length + 1)
-                if (contrasena == "google") {
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleado.length + 1).toString(),
-                        tipoPersona: "empleado",
-                        correo: correo,
-                        password: "unknown",
-                        id: idc,
-                        tipoAutenticacion: "google"
-                    });
-
-                    await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
-                        empleado_id: (todoEmpleado.length + 1).toString(),
-                        empleado_correo: correo,
-                        empleado_password: "unknown",
-                        empleado_nombre: nombre,
-                        empleado_apellidoPaterno: apell1,
-                        empleado_apellidoMaterno: apell2,
-                        empleado_domicilio: dom,
-                        empleado_fechaNac: fecnac,
-                        empleado_sueldoDeseado: sueldo
-                    });
-
+                if (contrasena == "#####") {
+                    let col=collection(db, "empleado");
+                    let q=query(col,where("empleado_correo","==",correo));
+                    let querySnapshot=await getDocs(q);
+                    if(querySnapshot.size==0){
+                        await setDoc(doc(db, "correos", idc.toString()), {
+                            idTipoPersona: (todoEmpleado.length + 1).toString(),
+                            tipoPersona: "empleado",
+                            correo: correo,
+                            password: "unknown",
+                            id: idc,
+                            tipoAutenticacion: "google"
+                        });
+    
+                        await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
+                            empleado_id: (todoEmpleado.length + 1).toString(),
+                            empleado_correo: correo,
+                            empleado_password: "unknown",
+                            empleado_nombre: nombre,
+                            empleado_apellidoPaterno: apell1,
+                            empleado_apellidoMaterno: apell2,
+                            empleado_domicilio: dom,
+                            empleado_fechaNac: fecnac,
+                            empleado_sueldoDeseado: sueldo
+                        });
+                    }
+                    
                 }
                 else {
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleado.length + 1).toString(),
-                        tipoPersona: "empleado",
-                        correo: correo,
-                        password: contrasena,
-                        id: idc,
-                        tipoAutenticacion: "email"
-                    });
-
-                    await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
-                        empleado_id: (todoEmpleado.length + 1).toString(),
-                        empleado_correo: correo,
-                        empleado_password: contrasena,
-                        empleado_nombre: nombre,
-                        empleado_apellidoPaterno: apell1,
-                        empleado_apellidoMaterno: apell2,
-                        empleado_domicilio: dom,
-                        empleado_fechaNac: fecnac,
-                        empleado_sueldoDeseado: sueldo
-                    });
+                    const cole = collection(db, "empleado");
+                    console.log(correo);
+                    const q = query(cole, where("empleado_correo", "==",correo ));
+                    const querySnapshot = await getDocs(q);
+                    console.log(querySnapshot.size);
+                    if(querySnapshot.size==0){
+                        await setDoc(doc(db, "correos", idc.toString()), {
+                            idTipoPersona: (todoEmpleado.length + 1).toString(),
+                            tipoPersona: "empleado",
+                            correo: correo,
+                            password: contrasena,
+                            id: idc,
+                            tipoAutenticacion: "email"
+                        });
+    
+                        await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
+                            empleado_id: (todoEmpleado.length + 1).toString(),
+                            empleado_correo: correo,
+                            empleado_password: contrasena,
+                            empleado_nombre: nombre,
+                            empleado_apellidoPaterno: apell1,
+                            empleado_apellidoMaterno: apell2,
+                            empleado_domicilio: dom,
+                            empleado_fechaNac: fecnac,
+                            empleado_sueldoDeseado: sueldo
+                        });
+                    }
                 }
+                redireccion("/inicioempleado",["empleado",(todoEmpleado.length + 1).toString(),idc]);
+
 
 
             }
-            else {
-                if (contrasena == "google") {
-                    let todoEmpleador = await Select("empleador");
+            else {//inicia zona de empleador
+                if (contrasena == "#####") {//empleador en google
+                    let  todoEmpleador= await Select('empleador');
                     console.log(todoEmpleador);
                     console.log(todoEmpleador.length);
                     console.log(todoEmpleador.length + 1)
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleador.length + 1).toString(),
-                        tipoPersona: "empleador",
-                        correo: correo,
-                        password: "unknown",
-                        id: idc,
-                        tipoAutenticacion:"google"
-                    });
-
-                    await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
-                        empleador_id: (todoEmpleador.length + 1).toString(),
-                        empleador_correo: correo,
-                        empleador_password: "unknown",
-                        empleador_nombre: nombre,
-                        empleador_apellidoPaterno: apell1,
-                        empleador_apellidoMaterno: apell2,
-                        empleador_domicilio: dom,
-                        empleador_fechaNac: fecnac
-                    });
-                }
-                else{
-                    let todoEmpleador = await Select("empleador");
-                    console.log(todoEmpleador);
-                    console.log(todoEmpleador.length);
-                    console.log(todoEmpleador.length + 1)
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleador.length + 1).toString(),
-                        tipoPersona: "empleador",
-                        correo: correo,
-                        password: contrasena,
-                        id: idc,
-                        tipoAutenticacion:'email'
-                    });
+                    let contadorRegistrados=0;
+                    for (let i=0;i<todoEmpleador.length;i++){
+                        if(todoEmpleador[i]['empleador_correo']==correo){
+                            contadorRegistrados++;
+                        }
+                    }
+                    if(contadorRegistrados==0){
+                        await setDoc(doc(db, "correos", idc.toString()), {
+                            idTipoPersona: (todoEmpleador.length + 1).toString(),
+                            tipoPersona: "empleador",
+                            correo: correo,
+                            password: "unknown",
+                            id: idc,
+                            tipoAutenticacion:"google"
+                        });
     
-                    await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
-                        empleador_id: (todoEmpleador.length + 1).toString(),
-                        empleador_correo: correo,
-                        empleador_password: contrasena,
-                        empleador_nombre: nombre,
-                        empleador_apellidoPaterno: apell1,
-                        empleador_apellidoMaterno: apell2,
-                        empleador_domicilio: dom,
-                        empleador_fechaNac: fecnac
-                    });
+                        await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
+                            empleador_id: (todoEmpleador.length + 1).toString(),
+                            empleador_correo: correo,
+                            empleador_password: "unknown",
+                            empleador_nombre: nombre,
+                            empleador_apellidoPaterno: apell1,
+                            empleador_apellidoMaterno: apell2,
+                            empleador_domicilio: dom,
+                            empleador_fechaNac: fecnac
+                        });
+                    }
+                    redireccionGoogle("/inicioempleador",{tipopersona:"empleador",idtipopersona:todoEmpleador.length+1})
+                    //redireccionGoogle("/inicioempleador",[idc,correo.toString(),"unknown"]);
+
                 }
+                else{//empleador pero correo
+                    let todoEmpleador = await Select("empleador");
+                    console.log(todoEmpleador);
+                    console.log(todoEmpleador.length);
+                    console.log(todoEmpleador.length + 1)
+                    todoEmpleador=await Select("empleador");
+                    let contadorRegistrados=0;
+                    for (let i=0;i<todoEmpleador.length;i++){
+                        if(todoEmpleador[i]['empleador_correo']==correo){
+                            contadorRegistrados++;
+                        }
+                    }
+                    console.log(contadorRegistrados);
+                    if(contadorRegistrados==0){
+                        await setDoc(doc(db, "correos", idc.toString()), {
+                            idTipoPersona: (todoEmpleador.length + 1).toString(),
+                            tipoPersona: "empleador",
+                            correo: correo,
+                            password: contrasena,
+                            id: idc,
+                            tipoAutenticacion:'email'
+                        });
+        
+                        await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
+                            empleador_id: (todoEmpleador.length + 1).toString(),
+                            empleador_correo: correo,
+                            empleador_password: contrasena,
+                            empleador_nombre: nombre,
+                            empleador_apellidoPaterno: apell1,
+                            empleador_apellidoMaterno: apell2,
+                            empleador_domicilio: dom,
+                            empleador_fechaNac: fecnac
+                        });
+                        
+
+                    }
+                    redireccion("/inicioempleador",["empleador",(todoEmpleador.length + 1).toString(),idc]);
+
+                    
+                }
+
+
 
 
                 
 
             }
-
-            window.location.href = "/login";
-
-
         } catch (e) {
             console.error("Error adding document: ", e);
         }
@@ -245,8 +297,6 @@ const DataUser: React.FC = () => {
                     if (nombre == "" || nombre == null || apell1 == "" || apell1 == null || apell2 == "" || apell2 == null || dom == "" || dom == null || fecnac == "" || fecnac == null
                         || sueldo == "" || sueldo == null || numcel == "" || numcel == null || tipoPersona == "" || tipoPersona == null) {
                         alert("Todos los campos son requeridos");
-
-
 
                     }
                     else {

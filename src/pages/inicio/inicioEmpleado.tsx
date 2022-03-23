@@ -24,7 +24,7 @@ import React, { useState } from "react";
 import { logoGoogle, personAdd } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
-import { getFirestore, collection, getDocs, addDoc, doc, setDoc } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, doc, setDoc,query,where } from 'firebase/firestore/lite';
 
 import { useHistory } from "react-router";
 
@@ -34,162 +34,89 @@ const InicioEmpleado: React.FC = () => {
     const auth = getAuth();
     const user = auth.currentUser;
     console.log(user);
-    async function LoginWithGoogle() {
-        const provider = new GoogleAuthProvider();
-        console.log(provider);
-        await signInWithPopup(getAuth(), provider).then(res => {
-            console.log(res)
-        })
+    let data = history.location.state;
+    let decodifyData=Object(JSON.parse(JSON.stringify(data))['detail'])
+    const db=getFirestore();
+    console.log(decodifyData);
+
+
+
+    let datosUser=TraerDatosDeUsuario(decodifyData["tipopersona"],decodifyData["idtipopersona"]);
+    let contador=0;
+    window.onload=function(){
+        datosUser.then((res:any)=>{
+            console.log(res);
+            traerTrabajosEmpleado();
+      
+        });
     }
-
-    async function Select(tabla: any) {
-
-        const db = getFirestore();
-        const coleccion = collection(db, tabla);
-
-        const correos = await getDocs(coleccion);
-
-        const listaDatos = correos.docs.map(doc => doc.data());
-        console.log(listaDatos)
-        return listaDatos;
-    }
-
-    async function insercion(nombre: any, apell1: any, apell2: any, dom: any, fecnac: any, sueldo: any, numcel: any, tipoPersona: any) {
-        let data = history.location.state;
-        data = Object(JSON.parse(JSON.stringify(data))['detail'])
-        console.log(data)
-        let correo = (Object(data)['correo']).toString();
-
-        let contrasena = (Object(data)['password']).toString();
-        let idc = (Object(data)['idcorreo']).toString();
-        console.log(correo + " " + contrasena + " " + idc);
-
-        const db = getFirestore();
-
-
-        try {
-
-            if (tipoPersona == "empleado") {
-                let todoEmpleado = await Select("empleado");
-                console.log(todoEmpleado);
-                console.log(todoEmpleado.length);
-                console.log(todoEmpleado.length + 1)
-                if (contrasena == "google") {
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleado.length + 1).toString(),
-                        tipoPersona: "empleado",
-                        correo: correo,
-                        password: "unknown",
-                        id: idc,
-                        tipoAutenticacion: "google"
-                    });
-
-                    await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
-                        empleado_id: (todoEmpleado.length + 1).toString(),
-                        empleado_correo: correo,
-                        empleado_password: "unknown",
-                        empleado_nombre: nombre,
-                        empleado_apellidoPaterno: apell1,
-                        empleado_apellidoMaterno: apell2,
-                        empleado_domicilio: dom,
-                        empleado_fechaNac: fecnac,
-                        empleado_sueldo: sueldo
-                    });
-
-                }
-                else {
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleado.length + 1).toString(),
-                        tipoPersona: "empleado",
-                        correo: correo,
-                        password: contrasena,
-                        id: idc,
-                        tipoAutenticacion: "email"
-                    });
-
-                    await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
-                        empleado_id: (todoEmpleado.length + 1).toString(),
-                        empleado_correo: correo,
-                        empleado_password: contrasena,
-                        empleado_nombre: nombre,
-                        empleado_apellidoPaterno: apell1,
-                        empleado_apellidoMaterno: apell2,
-                        empleado_domicilio: dom,
-                        empleado_fechaNac: fecnac,
-                        empleado_sueldo: sueldo
-                    });
-                }
-
-
-            }
-            else {
-                if (contrasena == "google") {
-                    let todoEmpleador = await Select("empleador");
-                    console.log(todoEmpleador);
-                    console.log(todoEmpleador.length);
-                    console.log(todoEmpleador.length + 1)
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleador.length + 1).toString(),
-                        tipoPersona: "empleador",
-                        correo: correo,
-                        password: "unknown",
-                        id: idc,
-                        tipoAutenticacion: "google"
-                    });
-
-                    await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
-                        empleador_id: (todoEmpleador.length + 1).toString(),
-                        empleador_correo: correo,
-                        empleador_password: "unknown",
-                        empleador_nombre: nombre,
-                        empleador_apellidoPaterno: apell1,
-                        empleador_apellidoMaterno: apell2,
-                        empleador_domicilio: dom,
-                        empleador_fechaNac: fecnac
-                    });
-                }
-                else {
-                    let todoEmpleador = await Select("empleador");
-                    console.log(todoEmpleador);
-                    console.log(todoEmpleador.length);
-                    console.log(todoEmpleador.length + 1)
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleador.length + 1).toString(),
-                        tipoPersona: "empleador",
-                        correo: correo,
-                        password: contrasena,
-                        id: idc,
-                        tipoAutenticacion: 'email'
-                    });
-
-                    await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
-                        empleador_id: (todoEmpleador.length + 1).toString(),
-                        empleador_correo: correo,
-                        empleador_password: contrasena,
-                        empleador_nombre: nombre,
-                        empleador_apellidoPaterno: apell1,
-                        empleador_apellidoMaterno: apell2,
-                        empleador_domicilio: dom,
-                        empleador_fechaNac: fecnac
-                    });
-                }
-
-
-
-
-            }
-
-            window.location.href = "/login";
-
-
-        } catch (e) {
-            console.error("Error adding document: ", e);
+    async function traerTrabajosEmpleado(){
+        let col=collection(db,'trabajo');
+        let datos=await getDocs(col);
+        let qall=datos.docs.map(doc=>doc.data());
+        console.log(qall)
+        for(let i=0;i<qall.length;i++){
+            if(contador<qall.length){
+                insertarCard(qall[i]['trabajo_titulo'],qall[i]['trabajo_descripcion'],qall[i]['trabajo_funciones'],qall[i]['trabajo_horaInicio'],
+                qall[i]['trabajo_horaFin'],qall[i]['trabajo_prestaciones'],qall[i]['trabajo_sueldo'],qall[i]['trabajo_ubicacion'],qall[i]['empleador_id']);
+            } 
         }
+    }
 
 
+    function insertarCard(titulo:any,descripcion:any,funciones:any,horai:any,horaf:any,prestaciones:any,sueldo:any,ubicacion:any,creadorid:any){
+        let cadena= `
+        <style>
+        .card {
+            /* Add shadows to create the "card" effect */
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+          }
+          
+          /* On mouse-over, add a deeper shadow */
+          .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+          }
+          
+          /* Add some padding inside the card container */
+          .container {
+            padding: 2px 16px;
+          }
+        </style>
+        <div class="card">
+        <img width="100" height="100" src="https://concepto.de/wp-content/uploads/2015/03/paisaje-800x409.jpg" alt="Avatar" style="width:100%">
+        <div class="container">
+          <h2><b>${titulo}</b></h2>
+          <h3><b>${descripcion}</b></h3>
+          <h4><b>Funciones:${funciones}</b></h4>
+          <h4><b>Desde las:${horai}</b></h4>
+          <h4><b>Hasta las:${horaf}</b></h4>
+          <h4><b>Prestaciones:${prestaciones}</b></h4>
+          <h4><b>Sueldo:${sueldo}</b></h4>
+          <h4><b>Ubicacion del trabajo:${ubicacion}</b></h4>
+          <h4><b>creadorid:${creadorid}</b></h4>
+        </div>
+      </div>`;
+        document.getElementById("todo")?.insertAdjacentHTML("beforeend", cadena);
+    }
 
-
-
+    async function TraerDatosDeUsuario(tipoUser:any,idUser:any){
+        let db=getFirestore();
+        let qs;
+        if(tipoUser=="empleado"){
+            let col=collection(db,"empleado");
+            let q=query(col,where("empleado_id","==",idUser))
+            qs= await getDocs(q);
+        }
+        else{
+            let col=collection(db,"empleador");
+            let q=query(col,where("empleador_id","==",idUser))
+            qs=await getDocs(q);// qs query snapshot
+        }
+        
+        let qsr=qs.docs.map(doc => doc.data());
+        console.log(qsr[0]);
+        return qsr[0];//qsr querysnapshotresult
     }
 
     return (
@@ -211,13 +138,17 @@ const InicioEmpleado: React.FC = () => {
                 </IonCol>
 
             </IonRow >
-            <IonRow style={{flex:18}}>
-                <IonContent >
-                    <Card />
-                    
+            <IonRow style={{flex:1,backgroundColor:"#1538BF"}} className="">
+                <h1>Empleos publicados</h1>
 
-                </IonContent>
+                
             </IonRow>
+            <IonRow id="todo"  style={{flex:18}}>
+                
+       
+            </IonRow>
+           
+
         </IonPage>
 
 
@@ -226,7 +157,7 @@ const InicioEmpleado: React.FC = () => {
 
     );
 };
-
+/*
 const Card = () => {
     return <IonCard>
         <IonRow style={{ justifyContent: "center" }}>
@@ -246,11 +177,8 @@ const Card = () => {
         </IonRow>
     </IonCard>
 
-
-
-
-
 }
+*/
 
 export default InicioEmpleado;
 

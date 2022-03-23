@@ -16,7 +16,8 @@ import {
     IonCard,
     IonCardHeader,
     IonCardSubtitle,
-    IonCardTitle
+    IonCardTitle,
+    IonVirtualScroll
 
 
 } from "@ionic/react";
@@ -24,176 +25,113 @@ import React, { useState } from "react";
 import { logoGoogle, personAdd } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
-import { getFirestore, collection, getDocs, addDoc, doc, setDoc } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, doc, setDoc ,query,where, QuerySnapshot, getDoc} from 'firebase/firestore/lite';
 
 import { useHistory } from "react-router";
-
 const InicioEmpleador: React.FC = () => {
     console.log(firebase);
     var history = useHistory();
     const auth = getAuth();
     const user = auth.currentUser;
     console.log(user);
-    async function LoginWithGoogle() {
-        const provider = new GoogleAuthProvider();
-        console.log(provider);
-        await signInWithPopup(getAuth(), provider).then(res => {
-            console.log(res)
+    var datosUser:any;
+    let data = history.location.state;
+    console.log(data);
+    let decodifyData=Object(JSON.parse(JSON.stringify(data))['detail'])
+    console.log(decodifyData);
+    datosUser= TraerDatosDeUsuario(decodifyData["idtipopersona"]);
+    const db=getFirestore();
+    let contador=0;
+    console.log(datosUser)
+    window.onload=function(){
+        datosUser.then((res:any)=>{
+            console.log(res);
+            traerTrabajosEmpleador(res['empleador_id']);
+        });
+    }
+    
+    
+
+    async function traerTrabajosEmpleador(idempleador:any){
+        let col=collection(db,'trabajo');
+        console.log(idempleador.toString());
+        let q=query(col,where("empleador_id","==",(idempleador).toString()));
+        let datos=await getDocs(q);
+        let qall=datos.docs.map(doc=>doc.data());
+        console.log(qall);
+        for(let i=0;i<qall.length;i++){
+            if(contador<qall.length){
+                insertarCard(qall[i]['trabajo_titulo'],qall[i]['trabajo_descripcion'],qall[i]['trabajo_funciones'],qall[i]['trabajo_horaInicio'],
+                qall[i]['trabajo_horaFin'],qall[i]['trabajo_prestaciones'],qall[i]['trabajo_sueldo'],qall[i]['trabajo_ubicacion']);
+            }
+            
+        }
+    }
+
+    function insertarCard(titulo:any,descripcion:any,funciones:any,horai:any,horaf:any,prestaciones:any,sueldo:any,ubicacion:any){
+        let cadena= `
+        <style>
+        .card {
+            /* Add shadows to create the "card" effect */
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+          }
+          
+          /* On mouse-over, add a deeper shadow */
+          .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+          }
+          
+          /* Add some padding inside the card container */
+          .container {
+            padding: 2px 16px;
+          }
+        </style>
+        <div class="card">
+        <img width="100" height="100" src="https://concepto.de/wp-content/uploads/2015/03/paisaje-800x409.jpg" alt="Avatar" style="width:100%">
+        <div class="container">
+          <h2><b>${titulo}</b></h2>
+          <h3><b>${descripcion}</b></h3>
+          <h4><b>Funciones:${funciones}</b></h4>
+          <h4><b>Desde las:${horai}</b></h4>
+          <h4><b>Hasta las:${horaf}</b></h4>
+          <h4><b>Prestaciones:${prestaciones}</b></h4>
+          <h4><b>Sueldo:${sueldo}</b></h4>
+          <h4><b>Ubicacion del trabajo:${ubicacion}</b></h4>
+        </div>
+      </div>`;
+        document.getElementById("todo")?.insertAdjacentHTML("beforeend", cadena);
+    }
+
+    async function TraerDatosDeUsuario(idUser:any){
+        console.log(idUser);
+        let db=getFirestore();
+        let qs;
+       
+        let col=collection(db,"empleador");
+        let q=query(col,where("empleador_id","==",(idUser).toString()))
+        qs=await getDocs(q);// qs query snapshot
+        
+        
+        let qsr=qs.docs.map(doc => doc.data());
+        console.log(qsr);
+        return qsr[0];//qsr querysnapshotresult
+        
+
+    }
+
+    function redireccion(ruta: any, datos: any) {
+        let data = datos
+
+        history.push({
+            pathname: ruta,
+            state: { detail: data }
         })
     }
-
-    async function Select(tabla: any) {
-
-        const db = getFirestore();
-        const coleccion = collection(db, tabla);
-
-        const correos = await getDocs(coleccion);
-
-        const listaDatos = correos.docs.map(doc => doc.data());
-        console.log(listaDatos)
-        return listaDatos;
-    }
-
-    async function insercion(nombre: any, apell1: any, apell2: any, dom: any, fecnac: any, sueldo: any, numcel: any, tipoPersona: any) {
-        let data = history.location.state;
-        data = Object(JSON.parse(JSON.stringify(data))['detail'])
-        console.log(data)
-        let correo = (Object(data)['correo']).toString();
-
-        let contrasena = (Object(data)['password']).toString();
-        let idc = (Object(data)['idcorreo']).toString();
-        console.log(correo + " " + contrasena + " " + idc);
-
-        const db = getFirestore();
-
-
-        try {
-
-            if (tipoPersona == "empleado") {
-                let todoEmpleado = await Select("empleado");
-                console.log(todoEmpleado);
-                console.log(todoEmpleado.length);
-                console.log(todoEmpleado.length + 1)
-                if (contrasena == "google") {
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleado.length + 1).toString(),
-                        tipoPersona: "empleado",
-                        correo: correo,
-                        password: "unknown",
-                        id: idc,
-                        tipoAutenticacion: "google"
-                    });
-
-                    await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
-                        empleado_id: (todoEmpleado.length + 1).toString(),
-                        empleado_correo: correo,
-                        empleado_password: "unknown",
-                        empleado_nombre: nombre,
-                        empleado_apellidoPaterno: apell1,
-                        empleado_apellidoMaterno: apell2,
-                        empleado_domicilio: dom,
-                        empleado_fechaNac: fecnac,
-                        empleado_sueldo: sueldo
-                    });
-
-                }
-                else {
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleado.length + 1).toString(),
-                        tipoPersona: "empleado",
-                        correo: correo,
-                        password: contrasena,
-                        id: idc,
-                        tipoAutenticacion: "email"
-                    });
-
-                    await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
-                        empleado_id: (todoEmpleado.length + 1).toString(),
-                        empleado_correo: correo,
-                        empleado_password: contrasena,
-                        empleado_nombre: nombre,
-                        empleado_apellidoPaterno: apell1,
-                        empleado_apellidoMaterno: apell2,
-                        empleado_domicilio: dom,
-                        empleado_fechaNac: fecnac,
-                        empleado_sueldo: sueldo
-                    });
-                }
-
-
-            }
-            else {
-                if (contrasena == "google") {
-                    let todoEmpleador = await Select("empleador");
-                    console.log(todoEmpleador);
-                    console.log(todoEmpleador.length);
-                    console.log(todoEmpleador.length + 1)
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleador.length + 1).toString(),
-                        tipoPersona: "empleador",
-                        correo: correo,
-                        password: "unknown",
-                        id: idc,
-                        tipoAutenticacion: "google"
-                    });
-
-                    await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
-                        empleador_id: (todoEmpleador.length + 1).toString(),
-                        empleador_correo: correo,
-                        empleador_password: "unknown",
-                        empleador_nombre: nombre,
-                        empleador_apellidoPaterno: apell1,
-                        empleador_apellidoMaterno: apell2,
-                        empleador_domicilio: dom,
-                        empleador_fechaNac: fecnac
-                    });
-                }
-                else {
-                    let todoEmpleador = await Select("empleador");
-                    console.log(todoEmpleador);
-                    console.log(todoEmpleador.length);
-                    console.log(todoEmpleador.length + 1)
-                    await setDoc(doc(db, "correos", idc.toString()), {
-                        idTipoPersona: (todoEmpleador.length + 1).toString(),
-                        tipoPersona: "empleador",
-                        correo: correo,
-                        password: contrasena,
-                        id: idc,
-                        tipoAutenticacion: 'email'
-                    });
-
-                    await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
-                        empleador_id: (todoEmpleador.length + 1).toString(),
-                        empleador_correo: correo,
-                        empleador_password: contrasena,
-                        empleador_nombre: nombre,
-                        empleador_apellidoPaterno: apell1,
-                        empleador_apellidoMaterno: apell2,
-                        empleador_domicilio: dom,
-                        empleador_fechaNac: fecnac
-                    });
-                }
-
-
-
-
-            }
-
-            window.location.href = "/login";
-
-
-        } catch (e) {
-            console.error("Error adding document: ", e);
-        }
-
-
-
-
-
-    }
-
+    
     return (
         <IonPage>
+            
             <IonRow style={{flex:1}} className="ion-text-center ion-justify-content-center">
                 <IonCol style={{flex:1}}>
                 <i ><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAclBMVEX///8AAADLy8sQEBDw8PA1NTX6+vpQUFBiYmIICAheXl4jIyPk5OTs7Oy9vb0wMDAWFhbU1NS1tbU6Ojp0dHT09PSioqKTk5NKSkonJycbGxuEhIRnZ2eKioo9PT1TU1PGxsagoKCvr694eHja2tpDQ0N7djjzAAACyUlEQVR4nO2b25KCMAyGKyetlDNFEUVEff9XXLUFdafOdCmEcTb/le5F820aahMSQlAo1KscllgTK2H8k/UgXWV+bE+s2M/2YaAwzw4RXQCJupvfCF7rQlmXCKn3tve5DWr/Jvv8EgvBGsz7T9FVvw3OGt78XXvpA+/c///Ur4+rSXWs/ae1g4iDNO7+cEwZ9yYWZ+myQ4jDRwDU8mvZfjwixhVvS2ly69y+niSPa8GYv8uKpM/bWwRexWcf0D4hjS9dwEkjIoAWkPYJ2Qi/xxbJBcrVgQUIMmF3Q+QRfIK1T8hB7gHZCVck0ACJ2PodEXtRMmgAJh5FSoQnIuAQuD198kmUAC48gIsACIAACIAAegDexTwdVWWCugBsvTNPR7NwMIA3TspSXoYCXHajAKjuW3oASfx50b9oMxQgGCdpp4og0AzCdow9oLki5dIE8KxqbapcmfLpH0TG6ah62a85CREAARAAARAAARAAARLzK9k+VV2KNAFSWVQ2ksGltKvoGsoefC2fPTGZPTXzjqPY9xWlcM0gvBxtaqwoVays+xg6VmiqRlmJ/5qDCAEQAAEQAAEQAAEQgDjMVIGyWKsJwKvIN1W5VrVnaN6Kz6N0uWWKW6EeABsjM7upHQowe2bEys+L/kF0sAe6hidDbRWvLnVf2bTbyFRZpcpMtM8BHphKvfT3nIQIgAAI8F8AZmxonL2lU5QibdC25rssMdGwI7IaDN7WWwm7S3IWH2plt9F06rpTNsSSrd3ALjj0rd28a25vIO03sgq+5IQU8tYVAcZh07X336vIXX//wi+gBhxO3W3/MeBAwn7E41pAjHgU137Eo3kAedXLkEu2XU6qbfYy5NKlC3y/mEXPd1nBfo5Bp/zl98ep4Ee9Dm8h76XjvKDTFa3D31WD4OTCjftlherkD8Kqhhh4rKvm4w8Pn3XkE4X6p/oBUCxUVpQhVWIAAAAASUVORK5CYII="></img></i>
@@ -203,21 +141,41 @@ const InicioEmpleador: React.FC = () => {
                     <h1>Inicio</h1>
                 </IonCol>
             </IonRow>
+
             <IonRow style={{flex:1}}>
                 <IonCol style={{flex:17}} >
-                    <IonButton >Añadir un nuevo empleo</IonButton>
+                    <IonButton onClick={function(){
+                    console.log(datosUser);
+                    datosUser.then((res:any)=>{
+                        console.log(res)
+                        redireccion("/anadirempleo",res);
+                    })
+
+                   
+
+                }} >Añadir un nuevo empleo</IonButton>
+                <IonButton onClick={function(){
+                    window.location.reload();
+                }}>Recargar trabajos</IonButton>
                 </IonCol>
                 <IonCol style={{flex:1}}>
                 <i ><img src="https://e7.pngegg.com/pngimages/404/688/png-clipart-computer-icons-macintosh-electronic-filter-filter-drawing-icon-miscellaneous-angle.png"></img></i>
                 </IonCol>
 
             </IonRow >
-            <IonRow style={{flex:18}}>
-                <IonContent >
-                    <Card />
+            <IonRow style={{flex:1,backgroundColor:"#1538BF"}} className="">
+                <h1>Empleos publicados</h1>
+
+                
+            </IonRow>
+            <IonRow id="todo"  style={{flex:18}}>
+                
+              
+                
+                
+                    
                     
 
-                </IonContent>
             </IonRow>
         </IonPage>
 
@@ -227,9 +185,9 @@ const InicioEmpleador: React.FC = () => {
 
     );
 };
-
+/*
 const Card = () => {
-    return <IonCard>
+    return <IonCard style={{backgroundColor:"#E6DEDC"}}>
         <IonRow style={{ justifyContent: "center" }}>
             <img src="https://i.blogs.es/e1feab/google-fotos/450_1000.jpg" />
         </IonRow>
@@ -244,14 +202,12 @@ const Card = () => {
                 Founded in 1829 on an isthmus between Lake Monona and Lake Mendota, Madison was named the capital of the
                 Wisconsin Territory in 1836.
             </IonCardContent>
+            
         </IonRow>
     </IonCard>
-
-
-
-
-
 }
+*/
+
 
 export default InicioEmpleador;
 
