@@ -55,7 +55,7 @@ const DataUser: React.FC = () => {
             state: { detail: data }
         })
     }
-    function redireccionGoogle(ruta: any, datos: any) {
+    function redireccionTotal(ruta: any, datos: any) {
         let data =datos;
 
         history.push({
@@ -68,10 +68,10 @@ const DataUser: React.FC = () => {
         let data = history.location.state;
         data = Object(JSON.parse(JSON.stringify(data))['detail'])
         console.log(data)
-        let correo = (Object(data)[1]).toString();
+        let correo = (Object(data)['correo']).toString();
 
-        let contrasena = (Object(data)[2]).toString();
-        let idc = (Object(data)[0]).toString();
+        let contrasena = (Object(data)['password']).toString();
+        let idc = (Object(data)['idcorreo']).toString();
         console.log(correo + " " + contrasena + " " + idc);
 
         const db = getFirestore();
@@ -140,10 +140,7 @@ const DataUser: React.FC = () => {
                         });
                     }
                 }
-                redireccion("/inicioempleado",["empleado",(todoEmpleado.length + 1).toString(),idc]);
-
-
-
+                redireccionTotal("/inicioempleado",{tipopersona:"empleado",idtipopersona:(todoEmpleado.length + 1).toString()});
             }
             else {//inicia zona de empleador
                 if (contrasena == "#####") {//empleador en google
@@ -178,8 +175,8 @@ const DataUser: React.FC = () => {
                             empleador_fechaNac: fecnac
                         });
                     }
-                    redireccionGoogle("/inicioempleador",{tipopersona:"empleador",idtipopersona:todoEmpleador.length+1})
-                    //redireccionGoogle("/inicioempleador",[idc,correo.toString(),"unknown"]);
+                    redireccionTotal("/inicioempleador",{tipopersona:"empleador",idtipopersona:todoEmpleador.length+1})
+                    //redireccionTotal("/inicioempleador",[idc,correo.toString(),"unknown"]);
 
                 }
                 else{//empleador pero correo
@@ -218,7 +215,8 @@ const DataUser: React.FC = () => {
                         
 
                     }
-                    redireccion("/inicioempleador",["empleador",(todoEmpleador.length + 1).toString(),idc]);
+                    redireccionTotal("/inicioempleador",{tipopersona:"empleador",idtipopersona:(todoEmpleador.length + 1).toString(),idcorreo:idc});
+
 
                     
                 }
@@ -271,7 +269,7 @@ const DataUser: React.FC = () => {
                     <IonInput id="borndate" type="date" />
                 </IonItem>
                 <IonItem>
-                    <IonLabel position="floating">Sueldo mensual deseado:</IonLabel>
+                    <IonLabel position="floating" id="labelsueldo">Sueldo mensual deseado:</IonLabel>
                     <IonInput id="sueldodeseado" inputMode="numeric" />
                 </IonItem>
                 <IonItem>
@@ -280,7 +278,19 @@ const DataUser: React.FC = () => {
                 </IonItem>
                 <IonItem>
                     <IonLabel position="floating">Tipo persona:</IonLabel>
-                    <IonSelect id="tippers" >
+                    <IonSelect id="tippers" onIonChange={function(){
+                        console.log("ssd");
+                        console.log((document.getElementById("tippers") as HTMLInputElement)?.value);
+                        if((document.getElementById("tippers") as HTMLInputElement)?.value=="empleador"){
+                            (document.getElementById("sueldodeseado") as HTMLInputElement).disabled=true;
+                            (document.getElementById("sueldodeseado") as HTMLInputElement).hidden=true;
+                            (document.getElementById("sueldodeseado") as HTMLInputElement).value="0";
+                        }
+                        else{
+                            (document.getElementById("sueldodeseado") as HTMLInputElement).disabled=false;
+                            (document.getElementById("sueldodeseado") as HTMLInputElement).hidden=false;
+                        }
+                    }} >
                         <IonSelectOption value="empleado">Empleado</IonSelectOption>
                         <IonSelectOption value="empleador">Empleador</IonSelectOption>
                     </IonSelect>
@@ -294,6 +304,9 @@ const DataUser: React.FC = () => {
                     let sueldo = (document.getElementById("sueldodeseado") as HTMLInputElement)?.value;
                     let numcel = (document.getElementById("numcel") as HTMLInputElement)?.value;
                     let tipoPersona = (document.getElementById("tippers") as HTMLInputElement)?.value;
+                    if(tipoPersona=="empleador"){
+                        
+                    }
                     if (nombre == "" || nombre == null || apell1 == "" || apell1 == null || apell2 == "" || apell2 == null || dom == "" || dom == null || fecnac == "" || fecnac == null
                         || sueldo == "" || sueldo == null || numcel == "" || numcel == null || tipoPersona == "" || tipoPersona == null) {
                         alert("Todos los campos son requeridos");

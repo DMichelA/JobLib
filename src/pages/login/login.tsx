@@ -96,9 +96,11 @@ const Login: React.FC = () => {
             if (user == correo) {
                 if (pw == contrasena) {
                     estado = "correcto";
+                    break;
                 }
                 else {
-                    estado = "error pw"
+                    estado = "error pw";
+                    break
                 }
             }
             else {
@@ -179,6 +181,21 @@ const Login: React.FC = () => {
                                     seterrorPW(false);
                                     seterrorEm(false)
                                 }
+                                else if(autenticado=='correcto'){
+                                    let col=collection(db,"correos");
+                                    let q=query(col,where("correo","==",correo));
+                                    let qs= await getDocs(q);
+                                    let qsr=qs.docs.map(doc => doc.data());
+                                    console.error(qsr[0]['tipoPersona']);
+                                    if(qsr[0]['tipoPersona']=="empleado"){
+                                        redireccion("/inicioempleado",{tipopersona:"empleado",idtipopersona:qsr[0]['idTipoPersona']});
+
+                                    }else{
+                                        redireccion("/inicioempleador",{tipopersona:"empleador",idtipopersona:qsr[0]['idTipoPersona']});
+
+                                    }
+
+                                }
 
                                 console.log(errorEm);
                                 console.log(errorPw);
@@ -186,6 +203,7 @@ const Login: React.FC = () => {
 
                             }} >
                                 {errorNe?<CorreoNoRegistrado />:errorEm && !errorPw ? <CorreoNoRegistrado /> : errorPw && !errorEm ? <ContrasenaIncorrecta /> : null}
+
 
                                 <IonIcon slot="start" icon={logIn} />
                                 Iniciar sesion
@@ -231,5 +249,6 @@ const ContrasenaIncorrecta: React.FC = () => {
     },3000);
     return null
 }
+
 export default Login;
 

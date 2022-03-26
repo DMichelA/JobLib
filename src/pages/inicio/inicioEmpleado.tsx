@@ -43,12 +43,16 @@ const InicioEmpleado: React.FC = () => {
 
     let datosUser=TraerDatosDeUsuario(decodifyData["tipopersona"],decodifyData["idtipopersona"]);
     let contador=0;
-    window.onload=function(){
+    console.log(document.getElementsByClassName("card").length);
+    
+    window.onload=async function(){
         datosUser.then((res:any)=>{
             console.log(res);
             traerTrabajosEmpleado();
-      
+        
         });
+        
+        
     }
     async function traerTrabajosEmpleado(){
         let col=collection(db,'trabajo');
@@ -103,6 +107,8 @@ const InicioEmpleado: React.FC = () => {
     async function TraerDatosDeUsuario(tipoUser:any,idUser:any){
         let db=getFirestore();
         let qs;
+        console.log(tipoUser);
+        console.log(idUser);
         if(tipoUser=="empleado"){
             let col=collection(db,"empleado");
             let q=query(col,where("empleado_id","==",idUser))
