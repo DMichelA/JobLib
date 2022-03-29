@@ -30,8 +30,11 @@ import AnadirEmpleo from "./pages/anadirEmpleo/anadirEmpleo"
 import VistaEmpleo from "./pages/vistaEmpleo/vistaEmpleo"
 import FiltroEmpleado from "./pages/filtro/filtroempleado"
 import FiltroEmpleador from "./pages/filtro/filtroempleador"
-import Perfil from './pages/perfil/perfil'
+import PerfilEmpleado from './pages/perfilEmpleado/perfilEmpleado'
+import PerfilEmpleador from './pages/perfilEmpleador/perfilEmpleador'
 import TrabajosAplicados from './pages/trabajosAplicadosEmpleado/trabajosAplicados'
+import ModificarEmpleo from './pages/ModificarEmpleo/modificarEmpleo'
+import Postulaciones from './pages/postulaciones/postulaciones';
 setupIonicReact();
 
 const App: React.FC = () => (
@@ -48,8 +51,11 @@ const App: React.FC = () => (
         <Route path="/vistaempleo" component={VistaEmpleo} exact={true}/>
         <Route path="/filtroempleado" component={FiltroEmpleado} exact={true}/>
         <Route path="/filtroempleador" component={FiltroEmpleador} exact={true}/>
-        <Route path="/perfil" component={Perfil} exact={true}/>
+        <Route path="/perfilempleado" component={PerfilEmpleado} exact={true}/>
+        <Route path="/perfilempleador" component={PerfilEmpleador} exact={true}/>
         <Route path="/trabajosaplicados" component={TrabajosAplicados} exact={true}/>
+        <Route path="/modificarempleo" component={ModificarEmpleo} exact={true}/>
+        <Route path="/postulaciones" component={Postulaciones} exact={true}/>
 
         <Redirect to="/login"/>
       </IonRouterOutlet>

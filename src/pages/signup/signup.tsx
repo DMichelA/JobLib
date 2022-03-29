@@ -14,7 +14,7 @@ import React, { Component, useState } from "react";
 import { logoGoogle, personAdd } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import firebase from "../database/Firebase";
-import { getFirestore, collection, getDocs, addDoc, setDoc, doc,where,query } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, setDoc, doc, where, query } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router-dom";
 
@@ -24,21 +24,24 @@ const SignUp: React.FC = () => {
     let history = useHistory();
     const auth = getAuth();
     console.log(auth)
-    window.onload=async function(){
-        
-    let email=await getRedirectResult(auth)
-    console.log(email?.user.email);
-    let col=collection(db,"correos");
-    const q = query(col, where("correo", "==",email?.user.email ));
-    const querySnapshot = await getDocs(q);
-    let todoCorre= await Select("correos");
+    window.onload = async function () {
 
-    if(querySnapshot.size==0){
-        redireccionGoogle("/datauser", [todoCorre.length+1, email?.user.email, "#####"]);
-    }
-    else{
-        setChange(true);
-    }        
+        let email = await getRedirectResult(auth)
+        console.log(email);
+        console.log(email?.user.email);
+        let col = collection(db, "correos");
+        const q = query(col, where("correo", "==", email?.user.email));
+        const querySnapshot = await getDocs(q);
+        let todoCorre = await Select("correos");
+        
+
+        if (querySnapshot.size == 0) {
+
+            redireccionGoogle("/datauser", { correo: email?.user.email, password: "#####", idcorreo: todoCorre.length + 1 });
+        }
+        else {
+            setChange(true);
+        }
     }
     async function LoginWithGoogle() {
         const provider = new GoogleAuthProvider();
@@ -64,8 +67,8 @@ const SignUp: React.FC = () => {
         //google
         if (contra == "unknown") {
             let correos = Select("correos");
-            console.log( await correos);
-            existe= await correos.then(correos => {
+            console.log(await correos);
+            existe = await correos.then(correos => {
                 let i = 0;
                 for (let i in correos) {
                     let userbd = (JSON.stringify(correos[i]['correo'])).toString();
@@ -81,9 +84,9 @@ const SignUp: React.FC = () => {
                     }
                 }
             });
-            
-            
-            
+
+
+
         }
         else {
             //email
@@ -141,7 +144,7 @@ const SignUp: React.FC = () => {
             state: { detail: data }
         })
     }
-   
+
 
 
     async function Select(tabla: any) {
@@ -230,10 +233,6 @@ const SignUp: React.FC = () => {
                                     Select("correo");
                                 }
                                 console.log(change);
-
-
-
-
                             }}>
                                 <IonIcon slot="start" icon={personAdd} />
                                 Crear cuenta

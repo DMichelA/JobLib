@@ -33,7 +33,7 @@ import { getFirestore, collection, getDocs, addDoc, doc, setDoc } from 'firebase
 
 import { useHistory } from "react-router";
 
-const TrabajosAplicados: React.FC = () => {
+const Postulaciones: React.FC = () => {
 
     console.log(firebase);
     var history = useHistory();
@@ -44,10 +44,8 @@ const TrabajosAplicados: React.FC = () => {
     let data = history.location.state;
     let decodifyDatas=Object(JSON.parse(JSON.stringify(data))['detail']);
     console.log(decodifyDatas);
-    let decodifyData=decodifyDatas["datosUser"]
-    let trabajostodos=decodifyDatas["datosTrabajos"]
-    let trabajos=decodifyDatas["trabajosaplicados"]
-    let empleadoresexistentes=decodifyDatas["empleadores"]
+    let trabajos=decodifyDatas.postulaciones;
+
     function redireccion(ruta: any, datos: any) {
         let data = datos;
 
@@ -74,7 +72,7 @@ const TrabajosAplicados: React.FC = () => {
             <IonRow style={{flex:18}}>
                 <IonContent >
                     {trabajos.length!=0?trabajos.map((trabajo:any) => 
-                        <Card  data={{trabajo:trabajo,empleadores:empleadoresexistentes,empleado_id:decodifyData['idtipopersona']}} />
+                        <Card  data={{trabajo:trabajo}} />
                         
                     ):<p>No hay trabajos aplicados</p>}
                 
@@ -86,15 +84,16 @@ const TrabajosAplicados: React.FC = () => {
             <IonRow style={{ backgroundColor: "red", alignContent: "flex-end" }}>
                     <IonButton onClick={async () => {
                         history.goBack();
+                        /*
                         let diccionarioEnviar = {
                             datosTrabajos: trabajostodos,
                             datosUser: { tipopersona: "empleado", idtipopersona: decodifyData['empleado_id'] },
                             empleadores: empleadoresexistentes
                         }
-                        console.log(diccionarioEnviar);
+                        */
 
-                        redireccion("/inicioempleado", diccionarioEnviar);
-                        window.location.reload();
+                        //redireccion("/inicioempleado", diccionarioEnviar);
+                        //window.location.reload();
 
 
                     }} style={{ float: "right" }} >Regresar</IonButton>
@@ -119,16 +118,15 @@ const Card = (props:any) => {
             state: { detail: data }
         })
     }
+    console.log(props.data.trabajo[0])
     
     return <IonCard id={props.data.trabajo_id} onClick={async function(){
         
-        redireccionTotal("/vistaempleo",props.data)
-        window.location.reload();
-        
+    
     }}>
         <IonRow style={{ justifyContent: "center" }}>
             <IonCardHeader>
-                <IonCardTitle>{props.data.trabajo.trabajo_titulo}</IonCardTitle>
+                <IonCardTitle>{props.data.trabajo[0].trabajo_titulo}</IonCardTitle>
             </IonCardHeader>
         </IonRow>
         <IonRow style={{ justifyContent: "center" }}>
@@ -137,15 +135,28 @@ const Card = (props:any) => {
         <IonRow style={{ justifyContent: "center" }}>
             <IonCardHeader>
                 <IonCardSubtitle>Descripcion:<br></br>
-                    {props.data.trabajo.trabajo_descripcion}</IonCardSubtitle>
+                    {props.data.trabajo[0].trabajo_descripcion}</IonCardSubtitle>
                 <IonCardSubtitle>Funciones:<br></br>
-                    {props.data.trabajo.trabajo_funciones}</IonCardSubtitle>
+                    {props.data.trabajo[0].trabajo_funciones}</IonCardSubtitle>
             </IonCardHeader>
+        </IonRow>
+        <IonRow>
+            <IonCardContent>
+                Datos del postulante:<br />
+                Nombre:{props.data.trabajo[1].empleado_nombre} {props.data.trabajo[1].empleado_apellidoPaterno} {props.data.trabajo[1].empleado_apellidoMaterno}<br/>
+                Numero de Telefono:{props.data.trabajo[1].empleado_numcel}<br/>
+                Fecha de Nacimiento:{props.data.trabajo[1].empleado_fechaNac}<br/>
+                Sueldo que el Aplicante Desea:{props.data.trabajo[1].empleado_sueldoDeseado}<br></br>
+                <IonRow>
+                    <IonButton>Rechazar</IonButton>
+                    <IonButton>Contratar</IonButton>
+                </IonRow>
+            </IonCardContent>
         </IonRow>
     </IonCard>
 
 }
-export default TrabajosAplicados;
+export default Postulaciones;
 
 
 

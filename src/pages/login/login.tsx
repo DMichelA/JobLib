@@ -41,16 +41,65 @@ const Login: React.FC = () => {
         }
         else{
             if(listaDatos[0]['tipoPersona']=="empleado"){
-                redireccion("/inicioempleado",{tipopersona:"empleado",idtipopersona:listaDatos[0]["idTipoPersona"]});
+                let datosTrabajo=trabajosTodos();
+                let empleadores=await empleadoresexistentes();
+                console.log(empleadores);
+                datosTrabajo.then(res=>{
+                    let diccionarioEnviar={
+                        datosTrabajos:res,
+                        datosUser:{tipopersona:"empleado",idtipopersona:listaDatos[0]["idTipoPersona"]},
+                        empleadores:empleadores
+
+                    }
+                    console.log(diccionarioEnviar)
+                    redireccion("/inicioempleado",diccionarioEnviar);
+                })
+                
     
             }
             else{
+                trabajosPorIdUser(listaDatos[0]["idTipoPersona"]);
+                /*
+                let diccionarioEnviar={
+                    datosTrabajos:res,
+                    datosUser:{tipopersona:"empleado",idtipopersona:listaDatos[0]["idTipoPersona"]},
+                    empleadores:empleadores
+
+                }
+
+                console.log(diccionarioEnviar)
+                redireccion("/inicioempleador",diccionarioEnviar);--correct
                 redireccion("/inicioempleador",{tipopersona:"empleador",idtipopersona:listaDatos[0]["idTipoPersona"]})
-    
+                */
             }
              
         }
     }
+
+    async function trabajosTodos(){
+        let col=collection(db,'trabajo');
+        let datos=getDocs(col);
+        let values;
+        let qall=await datos.then(res=>{
+            values=res.docs.map(doc=>doc.data())
+            return values;
+        });
+        return qall;
+    }
+
+    async function trabajosPorIdUser(ID:any){
+        let q=query(collection(db,"trabajo"),where("empleador_id","==",ID.toString()));
+        let qs= await getDocs(q);
+        let data=qs.docs.map(doc=>doc.data());
+        console.log(data);
+        return data;
+    }
+
+
+    
+
+
+
     function redireccion(ruta: any, datos: any) {
         let data =datos;
 
@@ -77,6 +126,20 @@ const Login: React.FC = () => {
         return listaDatos;
     }
 
+    async function empleadoresexistentes(){
+        let col=collection(db,"empleador");
+        let datos=await getDocs(col);
+        let datoss=datos.docs.map(doc=>doc.data())
+        return datoss;
+
+    }
+    async function empleadosexistentes(){
+        let col=collection(db,"empleado");
+        let datos=await getDocs(col);
+        let datoss=datos.docs.map(doc=>doc.data())
+        return datoss;
+
+    }
     async function authenticationWithEmailAndPassword(correo: any, contrasena: any) {
         console.log(correo);
         console.log(contrasena);
@@ -188,10 +251,29 @@ const Login: React.FC = () => {
                                     let qsr=qs.docs.map(doc => doc.data());
                                     console.error(qsr[0]['tipoPersona']);
                                     if(qsr[0]['tipoPersona']=="empleado"){
-                                        redireccion("/inicioempleado",{tipopersona:"empleado",idtipopersona:qsr[0]['idTipoPersona']});
+                                        let datosTrabajo=trabajosTodos();
+                                        let empleadores=await empleadoresexistentes();
+                                        console.log(empleadores)
+                                        datosTrabajo.then(res=>{
+                                            let diccionarioEnviar={
+                                                datosTrabajos:res,
+                                                datosUser:{tipopersona:"empleado",idtipopersona:qsr[0]['idTipoPersona']},
+                                                empleadores:empleadores
+                                            }
+                                            console.log(diccionarioEnviar);
+
+                                            redireccion("/inicioempleado",diccionarioEnviar);
+                                        })
 
                                     }else{
-                                        redireccion("/inicioempleador",{tipopersona:"empleador",idtipopersona:qsr[0]['idTipoPersona']});
+                                        let diccionarioEnviar={
+                                            datosTrabajos:await trabajosPorIdUser(qsr[0]['idTipoPersona']),
+                                            datosUser:{tipopersona:"empleado",idtipopersona:qsr[0]['idTipoPersona']},
+                                            empleados:await empleadosexistentes()
+                                        }
+                                        redireccion("/inicioempleador",diccionarioEnviar);
+
+                                        console.log(diccionarioEnviar)
 
                                     }
 

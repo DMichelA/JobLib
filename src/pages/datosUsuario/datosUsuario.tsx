@@ -29,6 +29,7 @@ const DataUser: React.FC = () => {
     const auth = getAuth();
     const user = auth.currentUser;
     console.log(user);
+    let db=getFirestore();
     
 
     async function Select(tabla: any) {
@@ -63,21 +64,35 @@ const DataUser: React.FC = () => {
             state: { detail: data }
         })
     }
+    async function trabajosTodos(){
+        let col=collection(db,'trabajo');
+        let datos=getDocs(col);
+        let values;
+        let qall=await datos.then(res=>{
+            values=res.docs.map(doc=>doc.data())
+            return values;
+        });
+        return qall;
+    }
 
     async function insercion(nombre: any, apell1: any, apell2: any, dom: any, fecnac: any, sueldo: any, numcel: any, tipoPersona: any) {
         let data = history.location.state;
         data = Object(JSON.parse(JSON.stringify(data))['detail'])
         console.log(data)
         let correo = (Object(data)['correo']).toString();
-
         let contrasena = (Object(data)['password']).toString();
         let idc = (Object(data)['idcorreo']).toString();
         console.log(correo + " " + contrasena + " " + idc);
+        const db = getFirestore();   
 
-        const db = getFirestore();
-        
+        async function empleadoresexistentes(){
+            let col=collection(db,"empleador");
+            let datos=await getDocs(col);
+            let datoss=datos.docs.map(doc=>doc.data())
+            return datoss;
+    
+        } 
         try {
-
             if (tipoPersona == "empleado") {
                 let todoEmpleado = await Select("empleado");
                 console.log(todoEmpleado);
@@ -106,7 +121,8 @@ const DataUser: React.FC = () => {
                             empleado_apellidoMaterno: apell2,
                             empleado_domicilio: dom,
                             empleado_fechaNac: fecnac,
-                            empleado_sueldoDeseado: sueldo
+                            empleado_sueldoDeseado: sueldo,
+                            empleado_numcel:numcel
                         });
                     }
                     
@@ -136,11 +152,21 @@ const DataUser: React.FC = () => {
                             empleado_apellidoMaterno: apell2,
                             empleado_domicilio: dom,
                             empleado_fechaNac: fecnac,
-                            empleado_sueldoDeseado: sueldo
+                            empleado_sueldoDeseado: sueldo,
+                            empleado_numcel:numcel
                         });
                     }
                 }
-                redireccionTotal("/inicioempleado",{tipopersona:"empleado",idtipopersona:(todoEmpleado.length + 1).toString()});
+                let datosTrabajo=trabajosTodos();
+                let empleadores=await empleadoresexistentes();
+                datosTrabajo.then(res=>{
+                    let diccionarioEnviar={
+                        datosTrabajos:res,
+                        datosUser:{tipopersona:"empleado",idtipopersona:(todoEmpleado.length + 1).toString()},
+                        empleadores:empleadores
+                    }
+                    redireccionTotal("/inicioempleado",diccionarioEnviar);
+                })
             }
             else {//inicia zona de empleador
                 if (contrasena == "#####") {//empleador en google
@@ -172,7 +198,8 @@ const DataUser: React.FC = () => {
                             empleador_apellidoPaterno: apell1,
                             empleador_apellidoMaterno: apell2,
                             empleador_domicilio: dom,
-                            empleador_fechaNac: fecnac
+                            empleador_fechaNac: fecnac,
+                            empleador_numcel:numcel
                         });
                     }
                     redireccionTotal("/inicioempleador",{tipopersona:"empleador",idtipopersona:todoEmpleador.length+1})
@@ -210,7 +237,8 @@ const DataUser: React.FC = () => {
                             empleador_apellidoPaterno: apell1,
                             empleador_apellidoMaterno: apell2,
                             empleador_domicilio: dom,
-                            empleador_fechaNac: fecnac
+                            empleador_fechaNac: fecnac,
+                            empleador_numcel:numcel
                         });
                         
 

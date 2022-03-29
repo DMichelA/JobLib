@@ -55,7 +55,7 @@ const AnadirEmpleo: React.FC = () => {
             trabajo_horaInicio:horarioinicio,
             trabajo_horaFin:horariofin,
             trabajo_prestaciones:prestaciones,
-            empleador_id:decodifyData['empleador_id']
+            empleador_id:decodifyData['datosUser']['idtipopersona']
         });
 
         window.location.reload();
@@ -63,6 +63,22 @@ const AnadirEmpleo: React.FC = () => {
         
     }
 
+    async function trabajosPorEmpleador(){
+        let q=query(collection(db,"trabajo"),where("empleador_id","==",decodifyData.datosUser.idtipopersona));
+        let qs= await getDocs(q);
+        let data=qs.docs.map(doc=>doc.data());
+        console.log(data);
+        return data;
+    }
+
+    function redireccion(ruta: any, datos: any) {
+        let data = datos
+
+        history.push({
+            pathname: ruta,
+            state: { detail: data }
+        })
+    }
   
 
 
@@ -110,7 +126,7 @@ const AnadirEmpleo: React.FC = () => {
                 </IonItem>
                 <IonItem>
                     <IonLabel position="stacked" >Escolaridad:</IonLabel>
-                    <IonSelect id="tippers" >
+                    <IonSelect id="escolaridad" >
                         <IonSelectOption value="primaria">Primaria o inferior</IonSelectOption>
                         <IonSelectOption value="secundaria">Secundaria</IonSelectOption>
                         <IonSelectOption value="preparatoria">Preparatoria o superior</IonSelectOption>
@@ -144,7 +160,7 @@ const AnadirEmpleo: React.FC = () => {
                     let ubicacion=(document.getElementById("ubicacion")as HTMLInputElement)?.value;
                     let sueldo=(document.getElementById("sueldo")as HTMLInputElement)?.value;
                     let edadRequerida=(document.getElementById("edadLaborador")as HTMLInputElement)?.value;
-                    let escolaridadRequerida=(document.getElementById("tippers")as HTMLInputElement)?.value;
+                    let escolaridadRequerida=(document.getElementById("escolaridad")as HTMLInputElement)?.value;
                     let experienciaRequerida=(document.getElementById("experiencia")as HTMLInputElement)?.value;
                     let funcionesPorRealizar=(document.getElementById("funciones")as HTMLInputElement)?.value;
                     let HorarioInicio=(document.getElementById("horarioInicio")as HTMLInputElement)?.value;
@@ -180,6 +196,14 @@ const AnadirEmpleo: React.FC = () => {
                 
 
             </IonContent>
+            <IonButton onClick={async ()=>{
+                let diccionarioEnviar=decodifyData;
+                diccionarioEnviar['datosTrabajos']=await trabajosPorEmpleador();
+                console.log(diccionarioEnviar);
+                redireccion("/inicioempleador",diccionarioEnviar);
+            }}>
+                Regresar
+            </IonButton>
         </IonPage>
     );
 };
