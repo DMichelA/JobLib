@@ -45,7 +45,6 @@ const InicioEmpleador: React.FC = () => {
     console.log(idEmpleador);
     console.log(empleadosexistentes);
     const db = getFirestore();
-    let contador = 0;
 
     
     async function trabajosPorEmpleador(){
@@ -103,7 +102,7 @@ const InicioEmpleador: React.FC = () => {
             let usuario=await traerEmpleadosPorId(data[i].empleado_id);
             let trab=await traerTrabajoPorId(data[i].trabajo_id);
             let idContrato=data[i].contrato_id;
-            trabajoyaplicante.push([trab,usuario,idContrato])
+            trabajoyaplicante.push([trab,usuario,data[i]])
         }
 
         console.log(trabajoyaplicante);
@@ -146,15 +145,17 @@ const InicioEmpleador: React.FC = () => {
 
                     }}>Perfil</IonButton>
                     <IonButton onClick={async function () {
-                        let post=postulacionesDeEmpleosDeEmpleador();
-                        post.then(res=>{
-                            let diccionarioEnviar={
-                                todo:datosHistory,
-                                postulaciones:res,
-                            }
-                            redireccion("/postulaciones", diccionarioEnviar);
 
-                        })
+                        let diccionarioEnviar={
+                            datosUser:datosHistory['datosUser'],
+                            datosTrabajos:datosHistory.datosTrabajos,
+                            todo:datosHistory,
+                            postulaciones: await postulacionesDeEmpleosDeEmpleador()
+                        }
+                        console.log(diccionarioEnviar);
+                        
+                        redireccionTotal("/postulaciones", diccionarioEnviar);
+
                         
                         
                         
@@ -202,14 +203,14 @@ const Card = (props: any) => {
             state: { detail: data }
         })
     }
-    console.log(props)
+    console.log(props.data)
     
 
     return <IonCard id={props.data.trabajo_id} onClick={async function () {
 
         redireccionTotal("/modificarempleo", {todo:props.data.todo,datosTrabajo:props.data.trabajo})
         window.location.reload();
-
+        console.log(props.data);
 
 
     }}>
@@ -229,11 +230,7 @@ const Card = (props: any) => {
                     {props.data.trabajo.trabajo_funciones}</IonCardSubtitle>
             </IonCardHeader>
         </IonRow>
-        <IonRow>
-            <IonCardContent>
-                Datos del Postulante
-            </IonCardContent>
-        </IonRow>
+        
     </IonCard>
 
 }

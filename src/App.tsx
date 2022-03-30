@@ -35,6 +35,9 @@ import PerfilEmpleador from './pages/perfilEmpleador/perfilEmpleador'
 import TrabajosAplicados from './pages/trabajosAplicadosEmpleado/trabajosAplicados'
 import ModificarEmpleo from './pages/ModificarEmpleo/modificarEmpleo'
 import Postulaciones from './pages/postulaciones/postulaciones';
+import Aceptadas from './pages/Aceptadas/Aceptadas';
+import Rechazadas from './pages/Rechazadas/Rechazadas';
+
 setupIonicReact();
 
 const App: React.FC = () => (
@@ -56,6 +59,8 @@ const App: React.FC = () => (
         <Route path="/trabajosaplicados" component={TrabajosAplicados} exact={true}/>
         <Route path="/modificarempleo" component={ModificarEmpleo} exact={true}/>
         <Route path="/postulaciones" component={Postulaciones} exact={true}/>
+        <Route path="/aceptadas" component={Aceptadas} exact={true}/>
+        <Route path="/rechazadas" component={Rechazadas} exact={true}/>
 
         <Redirect to="/login"/>
       </IonRouterOutlet>

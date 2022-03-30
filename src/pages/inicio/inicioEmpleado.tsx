@@ -28,7 +28,6 @@ import { getFirestore, collection, getDocs, addDoc, doc, setDoc, query, where } 
 
 import { useHistory } from "react-router";
 import { resolve } from "path";
-import TrabajosAplicados from "../trabajosAplicadosEmpleado/trabajosAplicados";
 
 const InicioEmpleado: React.FC = () => {
     console.log(firebase);
@@ -39,6 +38,7 @@ const InicioEmpleado: React.FC = () => {
     console.log(user);
     let data = history.location.state;
     let decodifyDatas = Object(JSON.parse(JSON.stringify(data))['detail'])
+    console.log(decodifyDatas);
     let decodifyData = decodifyDatas["datosUser"]
     let trabajos = decodifyDatas["datosTrabajos"]
     let empleadoresexistentes = decodifyDatas["empleadores"]
@@ -105,13 +105,14 @@ const InicioEmpleado: React.FC = () => {
         let q = query(collection(db, "trabajo"), where("trabajo_id", "==", ID.toString()));
         let qs = await getDocs(q);
         let result = qs.docs.map(doc => doc.data());
+        console.log(result);
         return result;
     }
 
 
     async function traerTrabajosAplicados() {
         let col = collection(db, "contrato");
-        let q = query(col, where("empleado_id", "==", decodifyData['idtipopersona']),where("status","==","PENDIENTE"))
+        let q = query(col, where("empleado_id", "==", decodifyData['idtipopersona']))
         let qs = await getDocs(q);
         let td = qs.docs.map(doc => doc.data());
         return td;
@@ -175,9 +176,6 @@ const InicioEmpleado: React.FC = () => {
                             trabajosQueHaAplicadoEsteUsuario.push(trabaj[0]);
 
                         }
-
-
-
                         let diccionarioEnviar = {
                             datosTrabajos: todtrab,
                             datosUser: decodifyData,
@@ -234,8 +232,9 @@ const Card = (props: any) => {
 
     return <IonCard id={props.data.trabajo_id} onClick={async function () {
 
-        redireccionTotal("/vistaempleo", props.data)
-        window.location.reload();
+        //redireccionTotal("/vistaempleo", props.data)
+        //window.location.reload();
+        console.log(props.data)
 
     }}>
         <IonRow style={{ justifyContent: "center" }}>

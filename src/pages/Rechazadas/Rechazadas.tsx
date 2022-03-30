@@ -91,25 +91,6 @@ const Postulaciones: React.FC = () => {
         return trabajoyaplicante;
 
     }
-    async function postulacionesAceptadasDeEmpleosDeEmpleador(){
-        let q=query(collection(db,"contrato"),where("empleador_id","==",idEmpleador),where("status","==","ACEPTADA"));
-        let qs=await getDocs(q);
-        let data=qs.docs.map(doc=>doc.data());
-        console.log(data);
-        let trabajoyaplicante=[]
-        //ordenes aplicada
-        for(let i=0;i<data.length;i++){
-            let usuario=await traerEmpleadosPorId(data[i].empleado_id);
-            let trab=await traerTrabajoPorId(data[i].trabajo_id);
-            trabajoyaplicante.push([trab,usuario,data[i]])
-        }
-
-        console.log(trabajoyaplicante);
-
-
-        return trabajoyaplicante;
-
-    }
     async function postulacionesRechazadasDeEmpleosDeEmpleador(){
         let q=query(collection(db,"contrato"),where("empleador_id","==",idEmpleador),where("status","==","RECHAZADA"));
         let qs=await getDocs(q);
@@ -130,6 +111,7 @@ const Postulaciones: React.FC = () => {
 
     }
 
+
     return (
         <IonPage>
             <IonRow style={{flex:1}} className="ion-text-center ion-justify-content-center">
@@ -146,30 +128,13 @@ const Postulaciones: React.FC = () => {
             </IonRow>
             <IonRow>
                 <IonButton onClick={async ()=>{
-                    let postulantes=await postulacionesDeEmpleosDeEmpleador();
-                    let diccionarioEnviar=decodifyDatas;
-                    diccionarioEnviar.postulaciones=postulantes;
-                    console.log(diccionarioEnviar)
-                    redireccion("/postulaciones",diccionarioEnviar);
-
-                }}>Recargar Postulantes</IonButton>
-                <IonButton onClick={async ()=>{
-                    let postulantes=await postulacionesAceptadasDeEmpleosDeEmpleador();
-                    let diccionarioEnviar=decodifyDatas;
-                    diccionarioEnviar.postulaciones=postulantes;
-                    console.log(diccionarioEnviar)
-                    redireccion("/aceptadas",diccionarioEnviar);
-
-                }}>Personas contratadas</IonButton>
-                 <IonButton onClick={async ()=>{
                     let postulantes=await postulacionesRechazadasDeEmpleosDeEmpleador();
+                    console.log(postulantes)
                     let diccionarioEnviar=decodifyDatas;
                     diccionarioEnviar.postulaciones=postulantes;
                     console.log(diccionarioEnviar)
                     redireccion("/rechazadas",diccionarioEnviar);
-
-                }}>Personas Rechazadas</IonButton>
-
+                }}>Recargar Postulantes Rechazados</IonButton>
             </IonRow>
             
             <IonRow style={{flex:18}}>
@@ -187,10 +152,11 @@ const Postulaciones: React.FC = () => {
             
             <IonRow style={{ backgroundColor: "red", alignContent: "flex-end" }}>
                     <IonButton onClick={async () => {
-                        //history.goBack();
-                        let diccionarioEnviar=decodifyDatas.todo;
-                        console.log(diccionarioEnviar);
-                        redireccion("/inicioempleador",decodifyDatas);
+                        let postulantes=await postulacionesDeEmpleosDeEmpleador();
+                        let diccionarioEnviar=decodifyDatas;
+                        diccionarioEnviar.postulaciones=postulantes;
+                        console.log(diccionarioEnviar)
+                        redireccion("/postulaciones",diccionarioEnviar);
                         /*
                         let diccionarioEnviar = {
                             datosTrabajos: trabajostodos,
@@ -227,7 +193,7 @@ const Card = (props:any) => {
             state: { detail: data }
         })
     }
-    console.log(props.data['empleador_id'])
+    console.log(props.data)
     let postulacionesDatos=props.data;
     let status=postulacionesDatos[2].status;
     
@@ -266,20 +232,10 @@ const Card = (props:any) => {
                 await updateDoc(update, {
                     status:"ACEPTADA"
                 });
-                alert("AHORA SE HA ACEPTADO AL POSTULANTE "+postulacionesDatos[1].empleado_nombre+" "+ postulacionesDatos[1].empleado_apellidoPaterno+" en el empleo publicado "+postulacionesDatos[0].trabajo_titulo)
+                alert("Ahora se ha aceptado al postulante "+postulacionesDatos[1].empleado_nombre+" "+ postulacionesDatos[1].empleado_apellidoPaterno+" en el empleo publicado "+postulacionesDatos[0].trabajo_titulo)
 
             }}>
                 ACEPTAR
-            </IonButton>
-            <IonButton onClick={async ()=>{
-                const update = doc(db, "contrato", postulacionesDatos[2].contrato_id);
-                await updateDoc(update, {
-                    status:"RECHAZADA"
-                });                
-                alert("AHORA SE HA RECHAZADO AL POSTULANTE "+postulacionesDatos[1].empleado_nombre+" "+ postulacionesDatos[1].empleado_apellidoPaterno+" en el empleo publicado "+postulacionesDatos[0].trabajo_titulo)
-            }}>
-                RECHAZAR
-
             </IonButton>
 
         </IonRow>
