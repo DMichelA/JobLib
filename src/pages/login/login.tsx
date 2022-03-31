@@ -338,7 +338,7 @@ const ContrasenaIncorrecta: React.FC = () => {
     const [present] = useIonAlert();
     present('La contraseña es incorrecta', [{ text: 'Ok' }])
     setTimeout(function(){
-        //window.location.reload()
+        window.location.reload()
     },3000);
     return null
 }

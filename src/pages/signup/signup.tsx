@@ -17,6 +17,7 @@ import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, addDoc, setDoc, doc, where, query } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router-dom";
+import { GooglePlus } from '@awesome-cordova-plugins/google-plus/ngx';
 
 const SignUp: React.FC = () => {
     const db = getFirestore()

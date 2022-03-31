@@ -146,10 +146,7 @@ const InicioEmpleador: React.FC = () => {
         <IonPage>
 
             <IonRow style={{ flex: 1 }} className="ion-text-center ion-justify-content-center">
-                <IonCol style={{ flex: 1 }}>
-                    <i ><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAclBMVEX///8AAADLy8sQEBDw8PA1NTX6+vpQUFBiYmIICAheXl4jIyPk5OTs7Oy9vb0wMDAWFhbU1NS1tbU6Ojp0dHT09PSioqKTk5NKSkonJycbGxuEhIRnZ2eKioo9PT1TU1PGxsagoKCvr694eHja2tpDQ0N7djjzAAACyUlEQVR4nO2b25KCMAyGKyetlDNFEUVEff9XXLUFdafOdCmEcTb/le5F820aahMSQlAo1KscllgTK2H8k/UgXWV+bE+s2M/2YaAwzw4RXQCJupvfCF7rQlmXCKn3tve5DWr/Jvv8EgvBGsz7T9FVvw3OGt78XXvpA+/c///Ur4+rSXWs/ae1g4iDNO7+cEwZ9yYWZ+myQ4jDRwDU8mvZfjwixhVvS2ly69y+niSPa8GYv8uKpM/bWwRexWcf0D4hjS9dwEkjIoAWkPYJ2Qi/xxbJBcrVgQUIMmF3Q+QRfIK1T8hB7gHZCVck0ACJ2PodEXtRMmgAJh5FSoQnIuAQuD198kmUAC48gIsACIAACIAAegDexTwdVWWCugBsvTNPR7NwMIA3TspSXoYCXHajAKjuW3oASfx50b9oMxQgGCdpp4og0AzCdow9oLki5dIE8KxqbapcmfLpH0TG6ah62a85CREAARAAARAAARAAARLzK9k+VV2KNAFSWVQ2ksGltKvoGsoefC2fPTGZPTXzjqPY9xWlcM0gvBxtaqwoVays+xg6VmiqRlmJ/5qDCAEQAAEQAAEQAAEQgDjMVIGyWKsJwKvIN1W5VrVnaN6Kz6N0uWWKW6EeABsjM7upHQowe2bEys+L/kF0sAe6hidDbRWvLnVf2bTbyFRZpcpMtM8BHphKvfT3nIQIgAAI8F8AZmxonL2lU5QibdC25rssMdGwI7IaDN7WWwm7S3IWH2plt9F06rpTNsSSrd3ALjj0rd28a25vIO03sgq+5IQU8tYVAcZh07X336vIXX//wi+gBhxO3W3/MeBAwn7E41pAjHgU137Eo3kAedXLkEu2XU6qbfYy5NKlC3y/mEXPd1nBfo5Bp/zl98ep4Ee9Dm8h76XjvKDTFa3D31WD4OTCjftlherkD8Kqhhh4rKvm4w8Pn3XkE4X6p/oBUCxUVpQhVWIAAAAASUVORK5CYII="></img></i>
-
-                </IonCol>
+                
                 <IonCol style={{ backgroundColor: "#1538BF", flex: 22 }}>
                     <h1>Inicio</h1>
                 </IonCol>
@@ -159,9 +156,6 @@ const InicioEmpleador: React.FC = () => {
                 <IonCol style={{ flex: 17 }} >
                     <IonButton onClick={function () {
                         redireccion("/anadirempleo", datosHistory);
-
-
-
                     }} >Añadir un nuevo empleo</IonButton>
                     <IonButton onClick={async function () {
                         let diccionarioEnviar=datosHistory;
@@ -221,7 +215,7 @@ const InicioEmpleador: React.FC = () => {
 
                     }}>Mensajes Recibidos</IonButton>
                     <IonButton onClick={()=>{
-                        redireccion("/","");
+                         window.location.href="/";
 
                     }}>
                         Cerrar sesión
