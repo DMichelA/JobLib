@@ -24,6 +24,20 @@ import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router";
 
 const PerfilEmpleador: React.FC = () => {
+    function onDeviceReady() {
+        document.addEventListener("backbutton", function (e) {
+          e.preventDefault();
+          console.log("hello");
+        }, false);
+      }
+      
+    document.onload = function () {
+    document.addEventListener("deviceready", onDeviceReady, false);
+    };
+    //BLOQUEAR TECLA RETROCESO EN EL NAVEGADOR
+    window.location.hash="no-back-button";
+    window.location.hash="Again-No-back-button";//esta linea es necesaria para chrome
+    window.onhashchange=function(){window.location.hash="no-back-button";}
     console.log(firebase);
     var history = useHistory();
     const auth = getAuth();
@@ -33,7 +47,8 @@ const PerfilEmpleador: React.FC = () => {
     let data = history.location.state;
     let mapaDatos=Object(JSON.parse(JSON.stringify(data))['detail'])
     console.log(mapaDatos);
-    
+    let nombre = (document.getElementById("nombre") as HTMLInputElement)?.value;
+    console.log(nombre);
     llenarCamposUsuario();
 
     async function updateProfile(nombre:any, apell1:any, apell2:any, dom:any, fecnac:any,numcel:any){
@@ -130,10 +145,13 @@ const PerfilEmpleador: React.FC = () => {
                     Actualizar
                 </IonButton>
                 <IonRow>
+                
                 <IonButton onClick={function(){
                         history.goBack();
-
                     }}>Regresar</IonButton>
+                    <IonButton onClick={function(){
+                        window.location.reload();
+                    }}>Recargar</IonButton>
             </IonRow>
 
             </IonContent>
