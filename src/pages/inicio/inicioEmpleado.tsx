@@ -45,6 +45,21 @@ const InicioEmpleado: React.FC = () => {
     console.log(empleadoresexistentes);
     console.log(decodifyData);
     console.log(trabajos);
+    function onDeviceReady() {
+        document.addEventListener("backbutton", function (e) {
+          e.preventDefault();
+          console.log("hello");
+        }, false);
+      }
+      
+    document.onload = function () {
+    document.addEventListener("deviceready", onDeviceReady, false);
+    };
+    //BLOQUEAR TECLA RETROCESO EN EL NAVEGADOR
+    window.location.hash="no-back-button";
+    window.location.hash="Again-No-back-button";//esta linea es necesaria para chrome
+    window.onhashchange=function(){window.location.hash="no-back-button";}
+
 
 
     async function traerTrabajosEmpleado() {

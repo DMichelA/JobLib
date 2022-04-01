@@ -21,9 +21,12 @@ const Home: React.FC = () => {
         }, false);
       }
       
-    
+    document.onload = function () {
+    document.addEventListener("deviceready", onDeviceReady, false);
+    };
     //BLOQUEAR TECLA RETROCESO EN EL NAVEGADOR
     window.location.hash="no-back-button";
+    window.location.hash="Again-No-back-button";//esta linea es necesaria para chrome
     window.onhashchange=function(){window.location.hash="no-back-button";}
     return (
         <IonPage>
@@ -59,13 +62,7 @@ const Home: React.FC = () => {
                     </IonRow>
                     <IonRow className="ion-text-center ion-justify-content-center">
                         <IonCol>
-                            <IonButton onClick={
-                                ()=>{
-                                    window.location.replace("/signup")
-                                    
-                           
-                                }
-                            }>Registrarse</IonButton>
+                            <IonRouterLink href="/signup" class="underline">Registrarse</IonRouterLink>
                         </IonCol>
                     </IonRow>
                 </IonGrid>
