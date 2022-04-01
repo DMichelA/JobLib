@@ -101,6 +101,7 @@ const SignUp: React.FC = () => {
                 let pw = (JSON.stringify(datosCorreos[i]['password'])).toString();
                 user = user.substring(1, user.length - 1);
                 pw = pw.substring(1, pw.length - 1);
+
                 console.log(user);
                 console.log(pw);
                 if (user == correo) {

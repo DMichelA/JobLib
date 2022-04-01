@@ -45,20 +45,6 @@ const InicioEmpleado: React.FC = () => {
     console.log(empleadoresexistentes);
     console.log(decodifyData);
     console.log(trabajos);
-    function onDeviceReady() {
-        document.addEventListener("backbutton", function (e) {
-          e.preventDefault();
-          console.log("hello");
-        }, false);
-      }
-      
-    document.onload = function () {
-    document.addEventListener("deviceready", onDeviceReady, false);
-    };
-    //BLOQUEAR TECLA RETROCESO EN EL NAVEGADOR
-    window.location.hash="no-back-button";
-    window.location.hash="Again-No-back-button";//esta linea es necesaria para chrome
-    window.onhashchange=function(){window.location.hash="no-back-button";}
 
 
 
@@ -126,11 +112,9 @@ const InicioEmpleado: React.FC = () => {
 
     async function traerTrabajosAplicados() {
         let col = collection(db, "contrato");
-        console.log(decodifyData['idtipopersona'])
-        let q = query(col, where("empleado_id", "==", decodifyData['idtipopersona']),where("status","==","PENDIENTE"));
+        let q = query(col, where("empleado_id", "==", decodifyData['idtipopersona']))
         let qs = await getDocs(q);
         let td = qs.docs.map(doc => doc.data());
-        console.log(td);
         return td;
 
     }
@@ -190,15 +174,10 @@ const InicioEmpleado: React.FC = () => {
                         }
                         console.log(diccionarioEnviar)
                         redireccionTotal("/trabajosaplicados", diccionarioEnviar);
-                        
+                        window.location.reload();
 
 
                     }}>Empleos aplicados</IonButton>
-                    <IonButton onClick={()=>{
-                        window.location.href="/";
-                    }}>
-                        Cerrar sesion
-                    </IonButton>
 
                 </IonCol>
             </IonRow>
@@ -210,9 +189,10 @@ const InicioEmpleado: React.FC = () => {
 
             <IonRow id="todo" style={{ flex: 18 }}>
                 <IonContent>
-                    {trabajos!=undefined?trabajos.length!=0?trabajos.map((trabajo: any) =>
+                    {trabajos.map((trabajo: any) =>
                         <Card data={{ trabajo: trabajo, empleadores: empleadoresexistentes, empleado_id: decodifyData['idtipopersona'] }} />
-                    ):<p>No hay trabajos disponibles</p>:null}
+
+                    )}
                 </IonContent>
             </IonRow>
 
@@ -241,8 +221,8 @@ const Card = (props: any) => {
 
     return <IonCard id={props.data.trabajo_id} onClick={async function () {
 
-        redireccionTotal("/vistaempleo", props.data)
-        window.location.reload();
+        //redireccionTotal("/vistaempleo", props.data)
+        //window.location.reload();
         console.log(props.data)
 
     }}>

@@ -24,26 +24,12 @@ import React, { useState } from "react";
 import { logoGoogle, personAdd } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
-import { getFirestore, collection, getDocs, orderBy, doc, setDoc, query, where, updateDoc } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, doc, setDoc, query, where, updateDoc } from 'firebase/firestore/lite';
 
 import { useHistory } from "react-router";
 import { error } from "console";
 
 const VistaEmpleo: React.FC = () => {
-    function onDeviceReady() {
-        document.addEventListener("backbutton", function (e) {
-          e.preventDefault();
-          console.log("hello");
-        }, false);
-      }
-      
-    document.onload = function () {
-    document.addEventListener("deviceready", onDeviceReady, false);
-    };
-    //BLOQUEAR TECLA RETROCESO EN EL NAVEGADOR
-    window.location.hash="no-back-button";
-    window.location.hash="Again-No-back-button";//esta linea es necesaria para chrome
-    window.onhashchange=function(){window.location.hash="no-back-button";}
     console.log(firebase);
     let db = getFirestore();
     var history = useHistory();
@@ -92,27 +78,17 @@ const VistaEmpleo: React.FC = () => {
         let q = query(col, where("empleado_id", "==", decodifyDatas['empleado_id']), where("trabajo_id", "==", decodifyDatas['trabajo']['trabajo_id']));
         let querySnapshot = await getDocs(q);
         let qs = querySnapshot.docs.map(doc => doc.data())
-        
         console.log(qs[0]);
-        
-        if(document.getElementById("aplicar")!=undefined){
-            if (qs[0]['status'] == "PENDIENTE") {
-                (document.getElementById("aplicar")as HTMLInputElement)!.innerText = "NO ESTOY INTERESADO YA";
-            }
-            else if (qs[0]['status'] == "CANCELADA") {
-                (document.getElementById("aplicar")as HTMLInputElement)!.innerText = "ESTOY INTERESADO";
-    
-            }
-            else if (qs[0]['status'] == "RECHAZADA") {
-                (document.getElementById("aplicar")as HTMLInputElement)!.innerText = "ESTOY INTERESADO";
-            }
+        if (qs[0]['status'] == "PENDIENTE") {
+            document.getElementById("aplicar")!.innerText = "NO ESTOY INTERESADO YA"
         }
-        else{
-            window.location.reload();
+        else if (qs[0]['status'] == "CANCELADA") {
+            document.getElementById("aplicar")!.innerText = "ESTOY INTERESADO"
+
         }
-            
-        
-       
+        else if (qs[0]['status'] == "RECHAZADA") {
+            document.getElementById("aplicar")!.innerText = "ESTOY INTERESADO"
+        }
     }
 
 
@@ -181,7 +157,7 @@ const VistaEmpleo: React.FC = () => {
                 }}>ESTOY INTERESADO</IonButton>
                 <IonRow style={{ backgroundColor: "red", alignContent: "flex-end" }}>
                     <IonButton onClick={async () => {
-                      
+                        history.goBack();
                         let datosTrabajo = trabajosTodos();
                         let empleadores = await empleadoresexistentes();
                         console.log(empleadores)
@@ -189,15 +165,12 @@ const VistaEmpleo: React.FC = () => {
                             let diccionarioEnviar = {
                                 datosTrabajos: res,
                                 datosUser: { tipopersona: "empleado", idtipopersona: decodifyDatas['empleado_id'] },
-                                empleadores: empleadores,
-                                empleado_id:decodifyDatas.empleado_id,
-                                trabajo:decodifyDatas.trabajo
+                                empleadores: empleadores
                             }
-                            console.log(decodifyDatas);
                             console.log(diccionarioEnviar);
 
                             redireccion("/inicioempleado", diccionarioEnviar);
-                            
+                            window.location.reload();
                         })
 
 
@@ -218,37 +191,8 @@ const VistaEmpleo: React.FC = () => {
 
 
 const Card = (props: any) => {
+
     var history = useHistory();
-    let db=getFirestore();
-    async function Conversaciones(empleadoid:any,empleadorid:any){
-        let q=query(collection(db,"conversaciones"),where("empleado_id","==",empleadoid),where("empleador_id","==",empleadorid));
-        let qs=await getDocs(q);
-        let result=qs.docs.map(doc=>doc.data());
-        console.log(result);
-        let idNuevaConversacion;
-        if(result.length==0){
-            idNuevaConversacion=1;
-        }
-        else{
-            idNuevaConversacion=result.length+1;
-        }
-
-
-        return {idPosibleNuevaConversacion:idNuevaConversacion,datosDeConversacion:result};
-
-    }
-    console.log(props.data)
-
-    async function Mensajes(conversacionid:any){
-        let q=query(collection(db,"mensajes"),where("conversacion_id","==",conversacionid));
-        let qs=await getDocs(q);
-        let result=qs.docs.map(doc=>doc.data());
-        console.log(result);
-        return result;
-
-    }
-
-
     function redireccionTotal(ruta: any, datos: any) {
         let data = datos;
 
@@ -259,27 +203,14 @@ const Card = (props: any) => {
     }
 
     let empleadoress = props.data.empleadores;
-    console.log(empleadoress);
     for (let i = 0; i < empleadoress.length; i++) {
-        if(empleadoress[i]["empleador_id"]!=undefined){
-            if(props.data.trabajo!=undefined){
-                if (empleadoress[i]["empleador_id"] == props.data.trabajo.empleador_id) {
-                    empleadoress = empleadoress[i]
-                }
-            }
-            else{
-                window.location.reload();
-            }
-            
+        if (empleadoress[i]["empleador_id"] == props.data.trabajo.empleador_id) {
+            empleadoress = empleadoress[i]
         }
-        else{
-            
-        }
-        
     }
-    
+    console.log(empleadoress);
+
     return <IonCard id={props.data.trabajo.trabajo_id} onClick={function () {
-        console.log(props.data);
 
     }}>
         <IonRow style={{ justifyContent: "center" }}>
@@ -315,38 +246,7 @@ const Card = (props: any) => {
                     Datos de Contacto <br />
                     Nombre Completo:{empleadoress.empleador_nombre} {empleadoress.empleador_apellidoPaterno} {empleadoress.empleador_apellidoMaterno} <br />
                     Numero de Celular: {empleadoress.empleador_numcel} <br />
-                    <IonButton onClick={
-                        async ()=>{
-                            let empleado=props.data.empleado_id;
-                            let empleador=props.data.trabajo.empleador_id;
-                            console.log(empleado);
-                            console.log(empleador)
-                            let conversaciones = await Conversaciones(empleado,empleador);
-                            let idConversacion;
-                            if(conversaciones.datosDeConversacion[0]==undefined){
-                                idConversacion=1;
-                            }
-                            else{
-                                idConversacion=conversaciones.datosDeConversacion[0].conversacion_id
-                            }
-                            let mensajesdeConversacion=await Mensajes(idConversacion)
-                            
-                            let diccionarioEnviar={
-                                empleado_id:props.data.empleado_id,
-                                empleadores:props.data.empleadores,
-                                trabajo:props.data.trabajo,
-                                conversacion:conversaciones,
-                                mensajesdeconversacion:mensajesdeConversacion,
-                                empleado:empleado,
-                                empleador:empleador
-                            }
-                            console.log(diccionarioEnviar);
-                            redireccionTotal("/mensajes",diccionarioEnviar);
-
-                            
-
-                        }
-                    }>Contactar por mensaje</IonButton>
+                    <IonButton>Contactar por mensaje</IonButton>
 
                 </IonRow>
 

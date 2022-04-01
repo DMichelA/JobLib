@@ -34,20 +34,7 @@ import { getFirestore, doc,updateDoc ,query,where,collection,getDocs} from 'fire
 import { useHistory } from "react-router";
 
 const Postulaciones: React.FC = () => {
-    function onDeviceReady() {
-        document.addEventListener("backbutton", function (e) {
-          e.preventDefault();
-          console.log("hello");
-        }, false);
-      }
-      
-    document.onload = function () {
-    document.addEventListener("deviceready", onDeviceReady, false);
-    };
-    //BLOQUEAR TECLA RETROCESO EN EL NAVEGADOR
-    window.location.hash="no-back-button";
-    window.location.hash="Again-No-back-button";//esta linea es necesaria para chrome
-    window.onhashchange=function(){window.location.hash="no-back-button";}
+
     console.log(firebase);
     var history = useHistory();
     const auth = getAuth();
@@ -190,7 +177,7 @@ const Postulaciones: React.FC = () => {
                 {postulacion.length!=0?postulacion.map((trabajo:any) => 
                         <Card  data={trabajo} />
                         
-                    ):<p>No hay personas que hayan aplicado a ninguna vacante</p>}
+                    ):<p>No hay trabajos aplicados</p>}
                    
                 
                     

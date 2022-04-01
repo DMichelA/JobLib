@@ -39,25 +39,7 @@ const InicioEmpleador: React.FC = () => {
     let datosHistory = Object(JSON.parse(JSON.stringify(data))['detail'])//CENTRO DE DATOS
     console.log(datosHistory);
     let trabajosPublicados=datosHistory['datosTrabajos'];
-    function onDeviceReady() {
-        document.addEventListener("backbutton", function (e) {
-          e.preventDefault();
-          console.log("hello");
-        }, false);
-      }
-      
-    document.onload = function () {
-    document.addEventListener("deviceready", onDeviceReady, false);
-    };
-    //BLOQUEAR TECLA RETROCESO EN EL NAVEGADOR
-    window.location.hash="no-back-button";
-    window.location.hash="Again-No-back-button";//esta linea es necesaria para chrome
-    window.onhashchange=function(){window.location.hash="no-back-button";}
-    if(datosHistory['datosUser']==undefined){
-        window.location.reload();
-    }
     let idEmpleador=datosHistory['datosUser']['idtipopersona'];
-    
     let empleadosexistentes=datosHistory['empleados'];
     console.log(trabajosPublicados);
     console.log(idEmpleador);
@@ -129,31 +111,6 @@ const InicioEmpleador: React.FC = () => {
         return trabajoyaplicante;
 
     }
-
-
-    async function conversacionesDeEmpleador(ID:any){
-        let q=query(collection(db,"conversaciones"),where("empleador_id","==",ID.toString()))
-        let qs= await getDocs(q);
-        let result= qs.docs.map(doc=>doc.data());
-
-        for(let i=0;i<result.length;i++){
-            let mensajes= await mensajesPorIdConversacion(result[i].conversacion_id);
-            console.log(mensajes);
-        }
-        return result;
-    }
-
-    async function mensajesPorIdConversacion(ID:any){
-        let q=query(collection(db,"mensajes"),where("conversacion_id","==",ID.toString()))
-        let qs= await getDocs(q);
-        let result= qs.docs.map(doc=>doc.data());
-        return result
-        
-    }
-
-
-
-
 
     return (
         <IonPage>
@@ -248,10 +205,10 @@ const InicioEmpleador: React.FC = () => {
             </IonRow>
             <IonRow id="todo" style={{ flex: 18 }}>
                 <IonContent>
-                {trabajosPublicados.length!=0?trabajosPublicados.map((trabajo: any) =>
+                {trabajosPublicados.map((trabajo: any) =>
                         <Card data={{ trabajo: trabajo, empleados: empleadosexistentes, empleador_id: idEmpleador,todo:datosHistory }} />
 
-                ):<p>No hay Trabajos publicados</p>}
+                )}
                 </IonContent>
             </IonRow>
 

@@ -20,7 +20,7 @@ import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, addDoc,query,where } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router-dom";
-var CryptoJS = require("crypto-js");
+
 const Login: React.FC = () => {
     let history = useHistory();
 
@@ -58,21 +58,19 @@ const Login: React.FC = () => {
     
             }
             else{
-                let datosTrabajos=trabajosPorIdUser(listaDatos[0]["idTipoPersona"]);
-                let empleados=await empleadosexistentes();
-                datosTrabajos.then(res=>{
-                    let diccionarioEnviar={
-                        datosTrabajos:res,
-                        datosUser:{tipopersona:"empleado",idtipopersona:listaDatos[0]["idTipoPersona"]},
-                        empleados:empleados
-                    }
-                    console.log(diccionarioEnviar)
-                    redireccion("/inicioempleador",diccionarioEnviar);
-                
-                })
-                
+                trabajosPorIdUser(listaDatos[0]["idTipoPersona"]);
+                /*
+                let diccionarioEnviar={
+                    datosTrabajos:res,
+                    datosUser:{tipopersona:"empleado",idtipopersona:listaDatos[0]["idTipoPersona"]},
+                    empleadores:empleadores
 
-                
+                }
+
+                console.log(diccionarioEnviar)
+                redireccion("/inicioempleador",diccionarioEnviar);--correct
+                redireccion("/inicioempleador",{tipopersona:"empleador",idtipopersona:listaDatos[0]["idTipoPersona"]})
+                */
             }
              
         }
@@ -139,7 +137,6 @@ const Login: React.FC = () => {
         let col=collection(db,"empleado");
         let datos=await getDocs(col);
         let datoss=datos.docs.map(doc=>doc.data())
-        console.log(datoss)
         return datoss;
 
     }
@@ -155,19 +152,11 @@ const Login: React.FC = () => {
         for (const dato in datos) {
             let user = (JSON.stringify(datos[dato]['correo'])).toString();
             let pw = (JSON.stringify(datos[dato]['password'])).toString();
-
-            var ciphertext = CryptoJS.AES.encrypt(JSON.stringify(contrasena), 'EMAC1718110404171811041117181103851718110382').toString();
-            console.log(ciphertext);
-            
             user = user.substring(1, user.length - 1);
             pw = pw.substring(1, pw.length - 1);
             console.log(user);
             console.log(pw);
             if (user == correo) {
-                var bytes  = CryptoJS.AES.decrypt(pw.toString(), 'EMAC1718110404171811041117181103851718110382');
-                var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-                console.log(decryptedData);
-                pw=decryptedData;
                 if (pw == contrasena) {
                     estado = "correcto";
                     break;

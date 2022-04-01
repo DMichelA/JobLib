@@ -22,7 +22,6 @@ import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, addDoc, doc, setDoc,query, where } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router";
-var CryptoJS = require("crypto-js");
 
 const DataUser: React.FC = () => {
     console.log(firebase);
@@ -31,20 +30,7 @@ const DataUser: React.FC = () => {
     const user = auth.currentUser;
     console.log(user);
     let db=getFirestore();
-    function onDeviceReady() {
-        document.addEventListener("backbutton", function (e) {
-          e.preventDefault();
-          console.log("hello");
-        }, false);
-      }
-      
-    document.onload = function () {
-    document.addEventListener("deviceready", onDeviceReady, false);
-    };
-    //BLOQUEAR TECLA RETROCESO EN EL NAVEGADOR
-    window.location.hash="no-back-button";
-    window.location.hash="Again-No-back-button";//esta linea es necesaria para chrome
-    window.onhashchange=function(){window.location.hash="no-back-button";}
+    
 
     async function Select(tabla: any) {
 
@@ -56,7 +42,6 @@ const DataUser: React.FC = () => {
         const listaDatos = correos.docs.map(doc => doc.data());
         console.log(listaDatos)
         return listaDatos;
-
     }
     function redireccion(ruta: any, datos: any) {
         let data = {
@@ -89,20 +74,6 @@ const DataUser: React.FC = () => {
         });
         return qall;
     }
-    async function empleadoresexistentes(){
-        let col=collection(db,"empleador");
-        let datos=await getDocs(col);
-        let datoss=datos.docs.map(doc=>doc.data())
-        return datoss;
-
-    } 
-    async function empleadosexistentes(){
-        let col=collection(db,"empleado");
-        let datos=await getDocs(col);
-        let datoss=datos.docs.map(doc=>doc.data())
-        return datoss;
-
-    }
 
     async function insercion(nombre: any, apell1: any, apell2: any, dom: any, fecnac: any, sueldo: any, numcel: any, tipoPersona: any) {
         let data = history.location.state;
@@ -113,11 +84,14 @@ const DataUser: React.FC = () => {
         let idc = (Object(data)['idcorreo']).toString();
         console.log(correo + " " + contrasena + " " + idc);
         const db = getFirestore();   
-        
-        var cipherpw = CryptoJS.AES.encrypt(JSON.stringify(contrasena), 'EMAC1718110404171811041117181103851718110382').toString();
-        
-        console.log(cipherpw);
-      
+
+        async function empleadoresexistentes(){
+            let col=collection(db,"empleador");
+            let datos=await getDocs(col);
+            let datoss=datos.docs.map(doc=>doc.data())
+            return datoss;
+    
+        } 
         try {
             if (tipoPersona == "empleado") {
                 let todoEmpleado = await Select("empleado");
@@ -159,14 +133,12 @@ const DataUser: React.FC = () => {
                     const q = query(cole, where("empleado_correo", "==",correo ));
                     const querySnapshot = await getDocs(q);
                     console.log(querySnapshot.size);
-
-                    
                     if(querySnapshot.size==0){
                         await setDoc(doc(db, "correos", idc.toString()), {
                             idTipoPersona: (todoEmpleado.length + 1).toString(),
                             tipoPersona: "empleado",
                             correo: correo,
-                            password: cipherpw,
+                            password: contrasena,
                             id: idc,
                             tipoAutenticacion: "email"
                         });
@@ -174,7 +146,7 @@ const DataUser: React.FC = () => {
                         await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
                             empleado_id: (todoEmpleado.length + 1).toString(),
                             empleado_correo: correo,
-                            empleado_password: cipherpw,
+                            empleado_password: contrasena,
                             empleado_nombre: nombre,
                             empleado_apellidoPaterno: apell1,
                             empleado_apellidoMaterno: apell2,
@@ -230,7 +202,8 @@ const DataUser: React.FC = () => {
                             empleador_numcel:numcel
                         });
                     }
-                    redireccionTotal("/inicioempleador",{datosUser:{tipopersona:"empleador",idtipopersona:(todoEmpleador.length + 1).toString(),idcorreo:idc},datosTrabajos:[],empleados:await empleadosexistentes()});
+                    redireccionTotal("/inicioempleador",{tipopersona:"empleador",idtipopersona:todoEmpleador.length+1})
+                    //redireccionTotal("/inicioempleador",[idc,correo.toString(),"unknown"]);
 
                 }
                 else{//empleador pero correo
@@ -251,7 +224,7 @@ const DataUser: React.FC = () => {
                             idTipoPersona: (todoEmpleador.length + 1).toString(),
                             tipoPersona: "empleador",
                             correo: correo,
-                            password: cipherpw,
+                            password: contrasena,
                             id: idc,
                             tipoAutenticacion:'email'
                         });
@@ -259,7 +232,7 @@ const DataUser: React.FC = () => {
                         await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
                             empleador_id: (todoEmpleador.length + 1).toString(),
                             empleador_correo: correo,
-                            empleador_password: cipherpw,
+                            empleador_password: contrasena,
                             empleador_nombre: nombre,
                             empleador_apellidoPaterno: apell1,
                             empleador_apellidoMaterno: apell2,
@@ -270,7 +243,7 @@ const DataUser: React.FC = () => {
                         
 
                     }
-                    redireccionTotal("/inicioempleador",{datosUser:{tipopersona:"empleador",idtipopersona:(todoEmpleador.length + 1).toString(),idcorreo:idc},datosTrabajos:[],empleados:await empleadosexistentes()});
+                    redireccionTotal("/inicioempleador",{tipopersona:"empleador",idtipopersona:(todoEmpleador.length + 1).toString(),idcorreo:idc});
 
 
                     
