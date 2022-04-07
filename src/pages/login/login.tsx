@@ -11,103 +11,114 @@ import {
     IonRouterLink,
     IonItem,
     IonInput,
+    
 } from "@ionic/react";
+import GoogleLogin from 'react-google-login';
 import React, { useState } from "react";
-import { logoGoogle, logIn } from "ionicons/icons";
-import { getAuth, GoogleAuthProvider, signInWithRedirect,getRedirectResult } from "firebase/auth";
+import { logoGoogle, logIn, alertOutline, options } from "ionicons/icons";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup } from "firebase/auth";
 //import  firebase from 'firebase/compat/app';
 import firebase from "../database/Firebase";
-import { getFirestore, collection, getDocs, addDoc,query,where } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, query, where } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router-dom";
 
+var CryptoJS = require("crypto-js");
 const Login: React.FC = () => {
     let history = useHistory();
 
     const db = getFirestore();
     Select();
-    window.onload=async function(){
+   
+    
+    window.onload = async function () {
         const auth = getAuth();
-        let email=await getRedirectResult(auth)
+        let email = await getRedirectResult(auth)
         console.log(email?.user.email);
-        let col=collection(db,"correos");
-        const q = query(col, where("correo", "==",email?.user.email ));
+        let col = collection(db, "correos");
+        const q = query(col, where("correo", "==", email?.user.email));
         const querySnapshot = await getDocs(q);
-        console.log(querySnapshot)    
+        console.log(querySnapshot)
         const listaDatos = querySnapshot.docs.map(doc => doc.data());
-       
-        if(querySnapshot.size==0){
+
+        if (querySnapshot.size == 0) {
             seterrorNe(true);
         }
-        else{
-            if(listaDatos[0]['tipoPersona']=="empleado"){
-                let datosTrabajo=trabajosTodos();
-                let empleadores=await empleadoresexistentes();
+        else {
+            if (listaDatos[0]['tipoPersona'] == "empleado") {
+                let datosTrabajo = trabajosTodos();
+                let empleadores = await empleadoresexistentes();
                 console.log(empleadores);
-                datosTrabajo.then(res=>{
-                    let diccionarioEnviar={
-                        datosTrabajos:res,
-                        datosUser:{tipopersona:"empleado",idtipopersona:listaDatos[0]["idTipoPersona"]},
-                        empleadores:empleadores
+                datosTrabajo.then(res => {
+                    let diccionarioEnviar = {
+                        datosTrabajos: res,
+                        datosUser: { tipopersona: "empleado", idtipopersona: listaDatos[0]["idTipoPersona"] },
+                        empleadores: empleadores
 
                     }
                     console.log(diccionarioEnviar)
-                    redireccion("/inicioempleado",diccionarioEnviar);
+                    redireccion("/inicioempleado", diccionarioEnviar);
                 })
-                
-    
-            }
-            else{
-                trabajosPorIdUser(listaDatos[0]["idTipoPersona"]);
-                /*
-                let diccionarioEnviar={
-                    datosTrabajos:res,
-                    datosUser:{tipopersona:"empleado",idtipopersona:listaDatos[0]["idTipoPersona"]},
-                    empleadores:empleadores
 
-                }
 
-                console.log(diccionarioEnviar)
-                redireccion("/inicioempleador",diccionarioEnviar);--correct
-                redireccion("/inicioempleador",{tipopersona:"empleador",idtipopersona:listaDatos[0]["idTipoPersona"]})
-                */
             }
-             
+            else {
+                let datosTrabajos = trabajosPorIdUser(listaDatos[0]["idTipoPersona"]);
+                let empleados = await empleadosexistentes();
+                datosTrabajos.then(res => {
+                    let diccionarioEnviar = {
+                        datosTrabajos: res,
+                        datosUser: { tipopersona: "empleado", idtipopersona: listaDatos[0]["idTipoPersona"] },
+                        empleados: empleados
+                    }
+                    console.log(diccionarioEnviar)
+                    redireccion("/inicioempleador", diccionarioEnviar);
+
+                })
+
+
+
+            }
+
         }
     }
 
-    async function trabajosTodos(){
-        let col=collection(db,'trabajo');
-        let datos=getDocs(col);
+    
+
+    async function trabajosTodos() {
+        let col = collection(db, 'trabajo');
+        let datos = getDocs(col);
         let values;
-        let qall=await datos.then(res=>{
-            values=res.docs.map(doc=>doc.data())
+        let qall = await datos.then(res => {
+            values = res.docs.map(doc => doc.data())
             return values;
         });
         return qall;
     }
 
-    async function trabajosPorIdUser(ID:any){
-        let q=query(collection(db,"trabajo"),where("empleador_id","==",ID.toString()));
-        let qs= await getDocs(q);
-        let data=qs.docs.map(doc=>doc.data());
+    async function trabajosPorIdUser(ID: any) {
+        let q = query(collection(db, "trabajo"), where("empleador_id", "==", ID.toString()));
+        let qs = await getDocs(q);
+        let data = qs.docs.map(doc => doc.data());
         console.log(data);
         return data;
     }
-
-
     
 
 
 
+
+
+
     function redireccion(ruta: any, datos: any) {
-        let data =datos;
+        let data = datos;
 
         history.push({
             pathname: ruta,
             state: { detail: data }
         })
     }
+    
     async function LoginWithGoogle() {
         const provider = new GoogleAuthProvider();
         console.log(provider);
@@ -115,7 +126,7 @@ const Login: React.FC = () => {
         await signInWithRedirect(auth, provider)
     }
     async function Select() {
-        
+
         const db = getFirestore();
         const coleccion = collection(db, 'correos');
 
@@ -126,17 +137,18 @@ const Login: React.FC = () => {
         return listaDatos;
     }
 
-    async function empleadoresexistentes(){
-        let col=collection(db,"empleador");
-        let datos=await getDocs(col);
-        let datoss=datos.docs.map(doc=>doc.data())
+    async function empleadoresexistentes() {
+        let col = collection(db, "empleador");
+        let datos = await getDocs(col);
+        let datoss = datos.docs.map(doc => doc.data())
         return datoss;
 
     }
-    async function empleadosexistentes(){
-        let col=collection(db,"empleado");
-        let datos=await getDocs(col);
-        let datoss=datos.docs.map(doc=>doc.data())
+    async function empleadosexistentes() {
+        let col = collection(db, "empleado");
+        let datos = await getDocs(col);
+        let datoss = datos.docs.map(doc => doc.data())
+        console.log(datoss)
         return datoss;
 
     }
@@ -146,17 +158,25 @@ const Login: React.FC = () => {
         var estado;
         let datos = await Select();
         console.log(datos);
-        if(datos.length==0){
-            estado="error NE"//NO EXISTENTE
+        if (datos.length == 0) {
+            estado = "error NE"//NO EXISTENTE
         }
         for (const dato in datos) {
             let user = (JSON.stringify(datos[dato]['correo'])).toString();
             let pw = (JSON.stringify(datos[dato]['password'])).toString();
+
+            var ciphertext = CryptoJS.AES.encrypt(JSON.stringify(contrasena), 'EMAC1718110404171811041117181103851718110382').toString();
+            console.log(ciphertext);
+
             user = user.substring(1, user.length - 1);
             pw = pw.substring(1, pw.length - 1);
             console.log(user);
             console.log(pw);
             if (user == correo) {
+                var bytes = CryptoJS.AES.decrypt(pw.toString(), 'EMAC1718110404171811041117181103851718110382');
+                var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                console.log(decryptedData);
+                pw = decryptedData;
                 if (pw == contrasena) {
                     estado = "correcto";
                     break;
@@ -239,39 +259,39 @@ const Login: React.FC = () => {
                                     seterrorNe(false);
 
                                 }
-                                else if(autenticado=="error NE"){
+                                else if (autenticado == "error NE") {
                                     seterrorNe(true);
                                     seterrorPW(false);
                                     seterrorEm(false)
                                 }
-                                else if(autenticado=='correcto'){
-                                    let col=collection(db,"correos");
-                                    let q=query(col,where("correo","==",correo));
-                                    let qs= await getDocs(q);
-                                    let qsr=qs.docs.map(doc => doc.data());
+                                else if (autenticado == 'correcto') {
+                                    let col = collection(db, "correos");
+                                    let q = query(col, where("correo", "==", correo));
+                                    let qs = await getDocs(q);
+                                    let qsr = qs.docs.map(doc => doc.data());
                                     console.error(qsr[0]['tipoPersona']);
-                                    if(qsr[0]['tipoPersona']=="empleado"){
-                                        let datosTrabajo=trabajosTodos();
-                                        let empleadores=await empleadoresexistentes();
+                                    if (qsr[0]['tipoPersona'] == "empleado") {
+                                        let datosTrabajo = trabajosTodos();
+                                        let empleadores = await empleadoresexistentes();
                                         console.log(empleadores)
-                                        datosTrabajo.then(res=>{
-                                            let diccionarioEnviar={
-                                                datosTrabajos:res,
-                                                datosUser:{tipopersona:"empleado",idtipopersona:qsr[0]['idTipoPersona']},
-                                                empleadores:empleadores
+                                        datosTrabajo.then(res => {
+                                            let diccionarioEnviar = {
+                                                datosTrabajos: res,
+                                                datosUser: { tipopersona: "empleado", idtipopersona: qsr[0]['idTipoPersona'] },
+                                                empleadores: empleadores
                                             }
                                             console.log(diccionarioEnviar);
 
-                                            redireccion("/inicioempleado",diccionarioEnviar);
+                                            redireccion("/inicioempleado", diccionarioEnviar);
                                         })
 
-                                    }else{
-                                        let diccionarioEnviar={
-                                            datosTrabajos:await trabajosPorIdUser(qsr[0]['idTipoPersona']),
-                                            datosUser:{tipopersona:"empleado",idtipopersona:qsr[0]['idTipoPersona']},
-                                            empleados:await empleadosexistentes()
+                                    } else {
+                                        let diccionarioEnviar = {
+                                            datosTrabajos: await trabajosPorIdUser(qsr[0]['idTipoPersona']),
+                                            datosUser: { tipopersona: "empleado", idtipopersona: qsr[0]['idTipoPersona'] },
+                                            empleados: await empleadosexistentes()
                                         }
-                                        redireccion("/inicioempleador",diccionarioEnviar);
+                                        redireccion("/inicioempleador", diccionarioEnviar);
 
                                         console.log(diccionarioEnviar)
 
@@ -284,12 +304,13 @@ const Login: React.FC = () => {
                                 console.log(errorNe);
 
                             }} >
-                                {errorNe?<CorreoNoRegistrado />:errorEm && !errorPw ? <CorreoNoRegistrado /> : errorPw && !errorEm ? <ContrasenaIncorrecta /> : null}
+                                {errorNe ? <CorreoNoRegistrado /> : errorEm && !errorPw ? <CorreoNoRegistrado /> : errorPw && !errorEm ? <ContrasenaIncorrecta /> : null}
 
 
                                 <IonIcon slot="start" icon={logIn} />
                                 Iniciar sesion
                             </IonButton>
+                           
                         </IonCol>
                     </IonRow>
                 </IonGrid>
@@ -305,6 +326,7 @@ const Login: React.FC = () => {
                         <IonCol>
                             <IonRouterLink href="/signup" class="underline">Registrarse</IonRouterLink>
                         </IonCol>
+                       
                     </IonRow>
                 </IonGrid>
             </IonFooter>
@@ -315,10 +337,10 @@ const Login: React.FC = () => {
 const CorreoNoRegistrado: React.FC = () => {
     const [present] = useIonAlert();
     present('Correo no registrado', [{ text: 'Ok' }])
-    setTimeout(function(){
+    setTimeout(function () {
         window.location.reload()
-    },3000);
-    
+    }, 3000);
+
     return null
 }
 
@@ -326,9 +348,9 @@ const CorreoNoRegistrado: React.FC = () => {
 const ContrasenaIncorrecta: React.FC = () => {
     const [present] = useIonAlert();
     present('La contraseña es incorrecta', [{ text: 'Ok' }])
-    setTimeout(function(){
+    setTimeout(function () {
         window.location.reload()
-    },3000);
+    }, 3000);
     return null
 }
 

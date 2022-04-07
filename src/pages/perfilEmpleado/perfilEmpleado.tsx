@@ -16,13 +16,14 @@ import {
 
 } from "@ionic/react";
 import React, { useState } from "react";
-import { logoGoogle, personAdd } from "ionicons/icons";
+import { arrowBackCircle } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs,  doc, updateDoc ,query, where } from 'firebase/firestore/lite';
 import { useHistory } from "react-router";
 
 const PerfilEmpleado: React.FC = () => {
+    
     console.log(firebase);
     var history = useHistory();
     const auth = getAuth();
@@ -79,7 +80,7 @@ const PerfilEmpleado: React.FC = () => {
             <IonContent fullscreen>
 
                 <IonRow className="ion-text-center ion-justify-content-center">
-                    <IonCol style={{ backgroundColor: "#1538BF" }}>
+                    <IonCol style={{ backgroundColor: "#4a90e2", color: "white" }}>
                         <h1>Perfil</h1>
                     </IonCol>
                 </IonRow>
@@ -134,11 +135,16 @@ const PerfilEmpleado: React.FC = () => {
                         updateProfile(nombre, apell1, apell2, dom, fecnac, numcel,sueldo);
                     }
 
-                }} className="ion-margin-top" expand="block">
+                }} className="ion-margin-top">
                     Actualizar
                 </IonButton>
-
             </IonContent>
+
+                <IonButton onClick={()=>{
+                    history.goBack();
+                }}><IonIcon icon={arrowBackCircle}/>Regresar</IonButton>
+
+
         </IonPage>
     );
 };

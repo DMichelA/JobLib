@@ -26,7 +26,7 @@ import {
 
 } from "@ionic/react";
 import React, { useState } from "react";
-import { logoGoogle, personAdd } from "ionicons/icons";
+import { arrowBackCircle} from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
 import { getFirestore, doc,updateDoc ,query,where,collection,getDocs} from 'firebase/firestore/lite';
@@ -34,7 +34,7 @@ import { getFirestore, doc,updateDoc ,query,where,collection,getDocs} from 'fire
 import { useHistory } from "react-router";
 
 const Postulaciones: React.FC = () => {
-
+    
     console.log(firebase);
     var history = useHistory();
     const auth = getAuth();
@@ -133,19 +133,12 @@ const Postulaciones: React.FC = () => {
     return (
         <IonPage>
             <IonRow style={{flex:1}} className="ion-text-center ion-justify-content-center">
-                <IonCol style={{ backgroundColor: "#1538BF" ,flex:2}}>
-                    <IonButton>
-                        menu
-                    </IonButton>
-                    
-                    
-                </IonCol>
-                <IonCol style={{ backgroundColor: "#1538BF" ,flex:18}}>
-                    <h1>Trabajos Aplicados</h1>
+                <IonCol style={{ backgroundColor: "#4a90e2" ,flex:18, color: "white"}}>
+                    <h1>Postulaciones</h1>
                 </IonCol>
             </IonRow>
-            <IonRow>
-                <IonButton onClick={async ()=>{
+            <IonRow className="ion-margin-vertical">
+                <IonButton color="warning" onClick={async ()=>{
                     let postulantes=await postulacionesDeEmpleosDeEmpleador();
                     let diccionarioEnviar=decodifyDatas;
                     diccionarioEnviar.postulaciones=postulantes;
@@ -153,7 +146,7 @@ const Postulaciones: React.FC = () => {
                     redireccion("/postulaciones",diccionarioEnviar);
 
                 }}>Recargar Postulantes</IonButton>
-                <IonButton onClick={async ()=>{
+                <IonButton color="success" onClick={async ()=>{
                     let postulantes=await postulacionesAceptadasDeEmpleosDeEmpleador();
                     let diccionarioEnviar=decodifyDatas;
                     diccionarioEnviar.postulaciones=postulantes;
@@ -161,7 +154,7 @@ const Postulaciones: React.FC = () => {
                     redireccion("/aceptadas",diccionarioEnviar);
 
                 }}>Personas contratadas</IonButton>
-                 <IonButton onClick={async ()=>{
+                 <IonButton color="danger" onClick={async ()=>{
                     let postulantes=await postulacionesRechazadasDeEmpleosDeEmpleador();
                     let diccionarioEnviar=decodifyDatas;
                     diccionarioEnviar.postulaciones=postulantes;
@@ -174,38 +167,35 @@ const Postulaciones: React.FC = () => {
             
             <IonRow style={{flex:18}}>
                 <IonContent >
-                {postulacion.length!=0?postulacion.map((trabajo:any) => 
+                {postulacion==undefined?window.location.reload():postulacion.length!=0?postulacion.map((trabajo:any) => 
                         <Card  data={trabajo} />
                         
-                    ):<p>No hay trabajos aplicados</p>}
+                    ):<p style={{ color: "red", fontSize: 20 }}>No hay personas que hayan aplicado a ninguna vacante</p>}
                    
                 
                     
 
                 </IonContent>
             </IonRow>
-            
-            <IonRow style={{ backgroundColor: "red", alignContent: "flex-end" }}>
-                    <IonButton onClick={async () => {
-                        //history.goBack();
-                        let diccionarioEnviar=decodifyDatas.todo;
-                        console.log(diccionarioEnviar);
-                        redireccion("/inicioempleador",decodifyDatas);
-                        /*
-                        let diccionarioEnviar = {
-                            datosTrabajos: trabajostodos,
-                            datosUser: { tipopersona: "empleado", idtipopersona: decodifyData['empleado_id'] },
-                            empleadores: empleadoresexistentes
-                        }
+            <IonButton onClick={async () => {
+                //history.goBack();
+                let diccionarioEnviar=decodifyDatas.todo;
+                console.log(diccionarioEnviar);
+                redireccion("/inicioempleador",diccionarioEnviar);
+                /*
+                let diccionarioEnviar = {
+                    datosTrabajos: trabajostodos,
+                    datosUser: { tipopersona: "empleado", idtipopersona: decodifyData['empleado_id'] },
+                    empleadores: empleadoresexistentes
+                }
 
-                        console.log(diccionarioEnviar);
+                console.log(diccionarioEnviar);
 
-                        redireccion("/inicioempleado", diccionarioEnviar);
-                        window.location.reload();
+                redireccion("/inicioempleado", diccionarioEnviar);
+                window.location.reload();
 */
 
-                    }} style={{ float: "right" }} >Regresar</IonButton>
-            </IonRow>
+            }} style={{ float: "right" }} ><IonIcon icon={arrowBackCircle}/>Regresar</IonButton>
         </IonPage>
 
 

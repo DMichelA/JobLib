@@ -16,7 +16,7 @@ import {
 
 } from "@ionic/react";
 import React, { useState } from "react";
-import { logoGoogle, personAdd } from "ionicons/icons";
+import { arrowBackCircle } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, doc,query,where,updateDoc} from 'firebase/firestore/lite';
@@ -24,6 +24,7 @@ import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router";
 
 const ModificarEmpleo: React.FC = () => {
+    
     console.log(firebase);
     var history = useHistory();
     const auth = getAuth();
@@ -113,13 +114,10 @@ const ModificarEmpleo: React.FC = () => {
             <IonContent fullscreen>
 
                 <IonRow className="ion-text-center ion-justify-content-center">
-                    <IonCol style={{ backgroundColor: "#1538BF", flex: 1 }}>
+                    <IonCol style={{ backgroundColor: "#4a90e2", flex: 1, color: "white" }}>
                         <IonRow style={{ flex: 1 }}>
-                            <IonCol style={{ flex: 1 }}>
-                                <IonButton>Menu</IonButton>
-                            </IonCol>
                             <IonCol style={{ flex: 10 }}>
-                                <h1>Menu</h1>
+                                <h1>Editar Empleo</h1>
 
                             </IonCol>
                         </IonRow>
@@ -179,46 +177,47 @@ const ModificarEmpleo: React.FC = () => {
                     <IonInput placeholder="Prestaciones" id="prestaciones"></IonInput>
 
                 </IonItem>
-                <IonButton onClick={function () {
-                    let tituloEmpleo = (document.getElementById("tituloEmpleo") as HTMLInputElement)?.value;
-                    let descripcion = (document.getElementById("descripcion") as HTMLInputElement)?.value;
-                    let ubicacion = (document.getElementById("ubicacion") as HTMLInputElement)?.value;
-                    let sueldo = (document.getElementById("sueldo") as HTMLInputElement)?.value;
-                    let edadRequerida = (document.getElementById("edadLaborador") as HTMLInputElement)?.value;
-                    let escolaridadRequerida = (document.getElementById("escolaridad") as HTMLInputElement)?.value;
-                    let experienciaRequerida = (document.getElementById("experiencia") as HTMLInputElement)?.value;
-                    let funcionesPorRealizar = (document.getElementById("funciones") as HTMLInputElement)?.value;
-                    let HorarioInicio = (document.getElementById("horarioInicio") as HTMLInputElement)?.value;
-                    let HorarioFin = (document.getElementById("horarioFin") as HTMLInputElement)?.value;
-                    let prestacionesOfrecidas = (document.getElementById("prestaciones") as HTMLInputElement)?.value;
-                    console.log(tituloEmpleo);
-                    console.log(descripcion);
-                    console.log(ubicacion);
-                    console.log(sueldo);
-                    console.log(edadRequerida);
-                    console.log(escolaridadRequerida);
-                    console.log(experienciaRequerida);
-                    console.log(funcionesPorRealizar);
-                    console.log(HorarioInicio);
-                    console.log(HorarioFin);
-                    console.log(prestacionesOfrecidas);
-                    console.log();
-                    if (tituloEmpleo == null || tituloEmpleo == "" || descripcion == null || descripcion == "" || ubicacion == null || ubicacion == "" ||
-                        sueldo == null || sueldo == "" || edadRequerida == null || edadRequerida == "" || escolaridadRequerida == null || escolaridadRequerida == "" ||
-                        experienciaRequerida == null || experienciaRequerida == "" || funcionesPorRealizar == null || funcionesPorRealizar == "" || HorarioInicio == null || HorarioFin == "" ||
-                        prestacionesOfrecidas == null || prestacionesOfrecidas == "") {
-                        alert("Por favor llena todos los campos");
-                    }
-                    else {
-                        modificarEmpleo(tituloEmpleo, descripcion, ubicacion, sueldo, edadRequerida, escolaridadRequerida, experienciaRequerida, funcionesPorRealizar, HorarioInicio, HorarioFin, prestacionesOfrecidas);
-                    }
+                <IonRow className="ion-justify-content-center">
+                    <IonButton color="warning" onClick={function () {
+                        let tituloEmpleo = (document.getElementById("tituloEmpleo") as HTMLInputElement)?.value;
+                        let descripcion = (document.getElementById("descripcion") as HTMLInputElement)?.value;
+                        let ubicacion = (document.getElementById("ubicacion") as HTMLInputElement)?.value;
+                        let sueldo = (document.getElementById("sueldo") as HTMLInputElement)?.value;
+                        let edadRequerida = (document.getElementById("edadLaborador") as HTMLInputElement)?.value;
+                        let escolaridadRequerida = (document.getElementById("escolaridad") as HTMLInputElement)?.value;
+                        let experienciaRequerida = (document.getElementById("experiencia") as HTMLInputElement)?.value;
+                        let funcionesPorRealizar = (document.getElementById("funciones") as HTMLInputElement)?.value;
+                        let HorarioInicio = (document.getElementById("horarioInicio") as HTMLInputElement)?.value;
+                        let HorarioFin = (document.getElementById("horarioFin") as HTMLInputElement)?.value;
+                        let prestacionesOfrecidas = (document.getElementById("prestaciones") as HTMLInputElement)?.value;
+                        console.log(tituloEmpleo);
+                        console.log(descripcion);
+                        console.log(ubicacion);
+                        console.log(sueldo);
+                        console.log(edadRequerida);
+                        console.log(escolaridadRequerida);
+                        console.log(experienciaRequerida);
+                        console.log(funcionesPorRealizar);
+                        console.log(HorarioInicio);
+                        console.log(HorarioFin);
+                        console.log(prestacionesOfrecidas);
+                        console.log();
+                        if (tituloEmpleo == null || tituloEmpleo == "" || descripcion == null || descripcion == "" || ubicacion == null || ubicacion == "" ||
+                            sueldo == null || sueldo == "" || edadRequerida == null || edadRequerida == "" || escolaridadRequerida == null || escolaridadRequerida == "" ||
+                            experienciaRequerida == null || experienciaRequerida == "" || funcionesPorRealizar == null || funcionesPorRealizar == "" || HorarioInicio == null || HorarioFin == "" ||
+                            prestacionesOfrecidas == null || prestacionesOfrecidas == "") {
+                            alert("Por favor llena todos los campos");
+                        }
+                        else {
+                            modificarEmpleo(tituloEmpleo, descripcion, ubicacion, sueldo, edadRequerida, escolaridadRequerida, experienciaRequerida, funcionesPorRealizar, HorarioInicio, HorarioFin, prestacionesOfrecidas);
+                        }
 
 
 
-                }} className="ion-margin-top" expand="block">
-                    Modificar
-                </IonButton>
-
+                    }} className="ion-margin-top">
+                        Modificar
+                    </IonButton>
+                </IonRow>
 
             </IonContent>
             <IonButton onClick={async()=>{
@@ -230,7 +229,7 @@ const ModificarEmpleo: React.FC = () => {
                 console.log(diccionarioEnviar);
 
                 redireccion("/inicioempleador",diccionarioEnviar);
-            }}>Regresar</IonButton>
+            }}><IonIcon icon={arrowBackCircle}/>Regresar</IonButton>
         </IonPage>
     );
 };

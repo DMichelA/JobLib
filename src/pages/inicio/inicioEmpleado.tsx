@@ -16,12 +16,17 @@ import {
     IonCard,
     IonCardHeader,
     IonCardSubtitle,
-    IonCardTitle
+    IonCardTitle,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonTitle,
+    IonMenuButton,
 
 
 } from "@ionic/react";
 import React, { useState } from "react";
-import { logoGoogle, personAdd } from "ionicons/icons";
+import { logOut } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, addDoc, doc, setDoc, query, where } from 'firebase/firestore/lite';
@@ -30,6 +35,11 @@ import { useHistory } from "react-router";
 import { resolve } from "path";
 
 const InicioEmpleado: React.FC = () => {
+    document.addEventListener('ionBackButton', ( ev:any) => {
+        ev.detail.register(10, () => {
+            window.location.reload();
+        });
+      });
     console.log(firebase);
     const db = getFirestore();
     var history = useHistory();
@@ -45,7 +55,6 @@ const InicioEmpleado: React.FC = () => {
     console.log(empleadoresexistentes);
     console.log(decodifyData);
     console.log(trabajos);
-
 
 
     async function traerTrabajosEmpleado() {
@@ -112,9 +121,11 @@ const InicioEmpleado: React.FC = () => {
 
     async function traerTrabajosAplicados() {
         let col = collection(db, "contrato");
-        let q = query(col, where("empleado_id", "==", decodifyData['idtipopersona']))
+        console.log(decodifyData['idtipopersona'])
+        let q = query(col, where("empleado_id", "==", decodifyData['idtipopersona']));
         let qs = await getDocs(q);
         let td = qs.docs.map(doc => doc.data());
+        console.log(td);
         return td;
 
     }
@@ -123,14 +134,14 @@ const InicioEmpleado: React.FC = () => {
     return (
         <IonPage>
             <IonRow style={{ flex: 1 }} className="ion-text-center ion-justify-content-center">
-                
-                <IonCol style={{ backgroundColor: "#1538BF", flex: 22 }}>
+                <IonCol style={{ backgroundColor: "#4a90e2", flex: 22, color: "white" }}>
                     <h1>Inicio</h1>
                 </IonCol>
             </IonRow>
+
             <IonRow>
                 <IonCol style={{ flex: 17 }} >
-                    <IonButton onClick={function () {
+                    <IonButton color="warning" onClick={function () {
                         //window.location.reload();
                         let todtrab = traerTrabajosEmpleado();
                         console.log(todtrab);
@@ -147,13 +158,7 @@ const InicioEmpleado: React.FC = () => {
                         })
 
                     }}>Recargar trabajos</IonButton>
-
-                    <IonButton onClick={function () {
-                        console.log(decodifyData);
-                        redireccionTotal("/perfilempleado", decodifyData);
-                        window.location.reload();
-                    }}>Perfil</IonButton>
-                    <IonButton onClick={async function () {
+                    <IonButton color="secondary" onClick={async function () {
                         let todtrab = await traerTrabajosEmpleado();//todos los trabajos existentes
                         console.log(todtrab);
                         let trabapli = await traerTrabajosAplicados();//trabajos a los que el usuario ha aplicado
@@ -162,6 +167,7 @@ const InicioEmpleado: React.FC = () => {
                         for (let i = 0; i < trabapli.length; i++) {
                             console.log(trabapli[i]['trabajo_id']);
                             let trabaj = await buscarTrabajoPorId(trabapli[i]['trabajo_id']);
+                            console.log(trabaj);
                             trabajosQueHaAplicadoEsteUsuario.push(trabaj[0]);
 
                         }
@@ -169,19 +175,33 @@ const InicioEmpleado: React.FC = () => {
                             datosTrabajos: todtrab,
                             datosUser: decodifyData,
                             empleadores: empleadoresexistentes,
-                            trabajosaplicados: trabajosQueHaAplicadoEsteUsuario
+                            trabajosaplicados: trabajosQueHaAplicadoEsteUsuario,
+                            contratosDatos:trabapli
 
                         }
                         console.log(diccionarioEnviar)
                         redireccionTotal("/trabajosaplicados", diccionarioEnviar);
-                        window.location.reload();
+                        
 
 
                     }}>Empleos aplicados</IonButton>
+                    <IonRow>
+                        <IonButton onClick={function () {
+                            console.log(decodifyData);
+                            redireccionTotal("/perfilempleado", decodifyData);
+                            window.location.reload();
+                        }}>Perfil</IonButton>
+                    </IonRow>
+                    <IonButton color="danger" onClick={()=>{
+                        window.location.href= "/";
+                    }}><IonIcon icon={logOut}/>
+                        Cerrar sesion
+                    </IonButton>
+
 
                 </IonCol>
             </IonRow>
-            <IonRow style={{ flex: 1, backgroundColor: "#1538BF" }} className="">
+            <IonRow style={{ flex: 1, backgroundColor: "#4a90e2", color: "white" }} className="">
                 <h1>Empleos publicados</h1>
 
 
@@ -189,10 +209,9 @@ const InicioEmpleado: React.FC = () => {
 
             <IonRow id="todo" style={{ flex: 18 }}>
                 <IonContent>
-                    {trabajos.map((trabajo: any) =>
+                    {trabajos!=undefined?trabajos.length!=0?trabajos.map((trabajo: any) =>
                         <Card data={{ trabajo: trabajo, empleadores: empleadoresexistentes, empleado_id: decodifyData['idtipopersona'] }} />
-
-                    )}
+                    ):<p style={{ color: "red", fontSize: 20 }}>No hay trabajos disponibles</p>:null}
                 </IonContent>
             </IonRow>
 
@@ -221,8 +240,8 @@ const Card = (props: any) => {
 
     return <IonCard id={props.data.trabajo_id} onClick={async function () {
 
-        //redireccionTotal("/vistaempleo", props.data)
-        //window.location.reload();
+        redireccionTotal("/vistaempleo", props.data)
+        window.location.reload();
         console.log(props.data)
 
     }}>
@@ -236,10 +255,8 @@ const Card = (props: any) => {
         </IonRow>
         <IonRow style={{ justifyContent: "center" }}>
             <IonCardHeader>
-                <IonCardSubtitle>Descripcion:<br></br>
-                    {props.data.trabajo.trabajo_descripcion}</IonCardSubtitle>
-                <IonCardSubtitle>Funciones:<br></br>
-                    {props.data.trabajo.trabajo_funciones}</IonCardSubtitle>
+                <b>Descripcion:</b> {props.data.trabajo.trabajo_descripcion}<br></br>
+                <b>Funciones:</b> {props.data.trabajo.trabajo_funciones}<br></br>
             </IonCardHeader>
         </IonRow>
     </IonCard>

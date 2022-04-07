@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "146361808800",
+    "firebase_url": "https://joblib-default-rtdb.firebaseio.com",
+    "project_id": "joblib",
+    "storage_bucket": "joblib.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:146361808800:android:fdd2506160098111f3d6c5",
+        "android_client_info": {
+          "package_name": "io.ionic.starter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "146361808800-r5p9ulau45k2nic9un8a31aeble56qe4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.ionic.starter",
+            "certificate_hash": "100527dc4c62579bdd658e84726c3ad6a318c920"
+          }
+        },
+        {
+          "client_id": "146361808800-r5p9ulau45k2nic9un8a31aeble56qe4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1pZ90aeQjPoAHbNtKio9vLs3g2wE6aEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "146361808800-r5p9ulau45k2nic9un8a31aeble56qe4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

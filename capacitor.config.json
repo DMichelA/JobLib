@@ -2,7 +2,7 @@
     "plugins": {
         "GoogleAuth": {
         "scopes": ["profile","email"],
-        "serverClientId": "160012889513-qkxxxxxxxxxxxxxxxxxxxxxxxxkgubrp5ve.apps.googleusercontent.com"
+        "serverClientId": "146361808800-r5p9ulau45k2nic9un8a31aeble56qe4.apps.googleusercontent.com"
         }
-        }
+    }
 }

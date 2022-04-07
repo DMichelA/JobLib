@@ -17,7 +17,6 @@ import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, addDoc, setDoc, doc, where, query } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router-dom";
-import { GooglePlus } from '@awesome-cordova-plugins/google-plus/ngx';
 
 const SignUp: React.FC = () => {
     const db = getFirestore()
@@ -54,7 +53,7 @@ const SignUp: React.FC = () => {
         })*/
 
         const auth = getAuth();
-        await signInWithRedirect(auth, provider)
+        await signInWithRedirect(auth,provider);
 
 
 
@@ -101,7 +100,6 @@ const SignUp: React.FC = () => {
                 let pw = (JSON.stringify(datosCorreos[i]['password'])).toString();
                 user = user.substring(1, user.length - 1);
                 pw = pw.substring(1, pw.length - 1);
-
                 console.log(user);
                 console.log(pw);
                 if (user == correo) {

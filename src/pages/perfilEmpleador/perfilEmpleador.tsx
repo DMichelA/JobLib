@@ -16,7 +16,7 @@ import {
 
 } from "@ionic/react";
 import React, { useState } from "react";
-import { logoGoogle, personAdd } from "ionicons/icons";
+import { arrowBackCircle } from "ionicons/icons";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, addDoc, doc, setDoc,query, where,updateDoc } from 'firebase/firestore/lite';
@@ -24,6 +24,7 @@ import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router";
 
 const PerfilEmpleador: React.FC = () => {
+   
     console.log(firebase);
     var history = useHistory();
     const auth = getAuth();
@@ -33,7 +34,8 @@ const PerfilEmpleador: React.FC = () => {
     let data = history.location.state;
     let mapaDatos=Object(JSON.parse(JSON.stringify(data))['detail'])
     console.log(mapaDatos);
-    
+    let nombre = (document.getElementById("nombre") as HTMLInputElement)?.value;
+    console.log(nombre);
     llenarCamposUsuario();
 
     async function updateProfile(nombre:any, apell1:any, apell2:any, dom:any, fecnac:any,numcel:any){
@@ -80,7 +82,7 @@ const PerfilEmpleador: React.FC = () => {
             <IonContent fullscreen>
 
                 <IonRow className="ion-text-center ion-justify-content-center">
-                    <IonCol style={{ backgroundColor: "#1538BF" }}>
+                    <IonCol style={{ backgroundColor: "#4a90e2", color: "white" }}>
                         <h1>Perfil</h1>
                     </IonCol>
                 </IonRow>
@@ -129,14 +131,17 @@ const PerfilEmpleador: React.FC = () => {
                 }} className="ion-margin-top" expand="block">
                     Actualizar
                 </IonButton>
-                <IonRow>
-                <IonButton onClick={function(){
-                        history.goBack();
-
-                    }}>Regresar</IonButton>
-            </IonRow>
-
+                <IonRow className="ion-justify-content-center">
+                    <IonButton color="warning" onClick={function(){
+                        window.location.reload();
+                    }}>Recargar</IonButton>
+                </IonRow>
             </IonContent>
+
+            <IonButton onClick={function(){
+                    history.goBack();
+                }}><IonIcon icon={arrowBackCircle}/>Regresar
+            </IonButton>
         </IonPage>
     );
 };

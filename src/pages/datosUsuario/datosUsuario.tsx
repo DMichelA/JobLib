@@ -22,6 +22,7 @@ import firebase from "../database/Firebase";
 import { getFirestore, collection, getDocs, addDoc, doc, setDoc,query, where } from 'firebase/firestore/lite';
 import { useIonAlert } from '@ionic/react';
 import { useHistory } from "react-router";
+var CryptoJS = require("crypto-js");
 
 const DataUser: React.FC = () => {
     console.log(firebase);
@@ -30,6 +31,7 @@ const DataUser: React.FC = () => {
     const user = auth.currentUser;
     console.log(user);
     let db=getFirestore();
+    
     
 
     async function Select(tabla: any) {
@@ -42,6 +44,7 @@ const DataUser: React.FC = () => {
         const listaDatos = correos.docs.map(doc => doc.data());
         console.log(listaDatos)
         return listaDatos;
+
     }
     function redireccion(ruta: any, datos: any) {
         let data = {
@@ -74,6 +77,20 @@ const DataUser: React.FC = () => {
         });
         return qall;
     }
+    async function empleadoresexistentes(){
+        let col=collection(db,"empleador");
+        let datos=await getDocs(col);
+        let datoss=datos.docs.map(doc=>doc.data())
+        return datoss;
+
+    } 
+    async function empleadosexistentes(){
+        let col=collection(db,"empleado");
+        let datos=await getDocs(col);
+        let datoss=datos.docs.map(doc=>doc.data())
+        return datoss;
+
+    }
 
     async function insercion(nombre: any, apell1: any, apell2: any, dom: any, fecnac: any, sueldo: any, numcel: any, tipoPersona: any) {
         let data = history.location.state;
@@ -84,14 +101,11 @@ const DataUser: React.FC = () => {
         let idc = (Object(data)['idcorreo']).toString();
         console.log(correo + " " + contrasena + " " + idc);
         const db = getFirestore();   
-
-        async function empleadoresexistentes(){
-            let col=collection(db,"empleador");
-            let datos=await getDocs(col);
-            let datoss=datos.docs.map(doc=>doc.data())
-            return datoss;
-    
-        } 
+        
+        var cipherpw = CryptoJS.AES.encrypt(JSON.stringify(contrasena), 'EMAC1718110404171811041117181103851718110382').toString();
+        
+        console.log(cipherpw);
+      
         try {
             if (tipoPersona == "empleado") {
                 let todoEmpleado = await Select("empleado");
@@ -133,12 +147,14 @@ const DataUser: React.FC = () => {
                     const q = query(cole, where("empleado_correo", "==",correo ));
                     const querySnapshot = await getDocs(q);
                     console.log(querySnapshot.size);
+
+                    
                     if(querySnapshot.size==0){
                         await setDoc(doc(db, "correos", idc.toString()), {
                             idTipoPersona: (todoEmpleado.length + 1).toString(),
                             tipoPersona: "empleado",
                             correo: correo,
-                            password: contrasena,
+                            password: cipherpw,
                             id: idc,
                             tipoAutenticacion: "email"
                         });
@@ -146,7 +162,7 @@ const DataUser: React.FC = () => {
                         await setDoc(doc(db, "empleado", (todoEmpleado.length + 1).toString()), {
                             empleado_id: (todoEmpleado.length + 1).toString(),
                             empleado_correo: correo,
-                            empleado_password: contrasena,
+                            empleado_password: cipherpw,
                             empleado_nombre: nombre,
                             empleado_apellidoPaterno: apell1,
                             empleado_apellidoMaterno: apell2,
@@ -202,8 +218,7 @@ const DataUser: React.FC = () => {
                             empleador_numcel:numcel
                         });
                     }
-                    redireccionTotal("/inicioempleador",{tipopersona:"empleador",idtipopersona:todoEmpleador.length+1})
-                    //redireccionTotal("/inicioempleador",[idc,correo.toString(),"unknown"]);
+                    redireccionTotal("/inicioempleador",{datosUser:{tipopersona:"empleador",idtipopersona:(todoEmpleador.length + 1).toString(),idcorreo:idc},datosTrabajos:[],empleados:await empleadosexistentes()});
 
                 }
                 else{//empleador pero correo
@@ -224,7 +239,7 @@ const DataUser: React.FC = () => {
                             idTipoPersona: (todoEmpleador.length + 1).toString(),
                             tipoPersona: "empleador",
                             correo: correo,
-                            password: contrasena,
+                            password: cipherpw,
                             id: idc,
                             tipoAutenticacion:'email'
                         });
@@ -232,7 +247,7 @@ const DataUser: React.FC = () => {
                         await setDoc(doc(db, "empleador", (todoEmpleador.length + 1).toString()), {
                             empleador_id: (todoEmpleador.length + 1).toString(),
                             empleador_correo: correo,
-                            empleador_password: contrasena,
+                            empleador_password: cipherpw,
                             empleador_nombre: nombre,
                             empleador_apellidoPaterno: apell1,
                             empleador_apellidoMaterno: apell2,
@@ -243,7 +258,7 @@ const DataUser: React.FC = () => {
                         
 
                     }
-                    redireccionTotal("/inicioempleador",{tipopersona:"empleador",idtipopersona:(todoEmpleador.length + 1).toString(),idcorreo:idc});
+                    redireccionTotal("/inicioempleador",{datosUser:{tipopersona:"empleador",idtipopersona:(todoEmpleador.length + 1).toString(),idcorreo:idc},datosTrabajos:[],empleados:await empleadosexistentes()});
 
 
                     
@@ -271,7 +286,7 @@ const DataUser: React.FC = () => {
             <IonContent fullscreen>
 
                 <IonRow className="ion-text-center ion-justify-content-center">
-                    <IonCol style={{ backgroundColor: "#1538BF" }}>
+                    <IonCol style={{ backgroundColor: "#4a90e2", color: "white" }}>
                         <h1>Configuración</h1>
                     </IonCol>
                 </IonRow>
@@ -323,31 +338,32 @@ const DataUser: React.FC = () => {
                         <IonSelectOption value="empleador">Empleador</IonSelectOption>
                     </IonSelect>
                 </IonItem>
-                <IonButton onClick={function () {
-                    let nombre = (document.getElementById("nombre") as HTMLInputElement)?.value;
-                    let apell1 = (document.getElementById("apellido1") as HTMLInputElement)?.value;
-                    let apell2 = (document.getElementById("apellido2") as HTMLInputElement)?.value;
-                    let dom = (document.getElementById("domicilio") as HTMLInputElement)?.value;
-                    let fecnac = (document.getElementById("borndate") as HTMLInputElement)?.value;
-                    let sueldo = (document.getElementById("sueldodeseado") as HTMLInputElement)?.value;
-                    let numcel = (document.getElementById("numcel") as HTMLInputElement)?.value;
-                    let tipoPersona = (document.getElementById("tippers") as HTMLInputElement)?.value;
-                    if(tipoPersona=="empleador"){
-                        
-                    }
-                    if (nombre == "" || nombre == null || apell1 == "" || apell1 == null || apell2 == "" || apell2 == null || dom == "" || dom == null || fecnac == "" || fecnac == null
-                        || sueldo == "" || sueldo == null || numcel == "" || numcel == null || tipoPersona == "" || tipoPersona == null) {
-                        alert("Todos los campos son requeridos");
+                <IonRow className="ion-margin-top ion-justify-content-center">
+                    <IonButton onClick={function () {
+                        let nombre = (document.getElementById("nombre") as HTMLInputElement)?.value;
+                        let apell1 = (document.getElementById("apellido1") as HTMLInputElement)?.value;
+                        let apell2 = (document.getElementById("apellido2") as HTMLInputElement)?.value;
+                        let dom = (document.getElementById("domicilio") as HTMLInputElement)?.value;
+                        let fecnac = (document.getElementById("borndate") as HTMLInputElement)?.value;
+                        let sueldo = (document.getElementById("sueldodeseado") as HTMLInputElement)?.value;
+                        let numcel = (document.getElementById("numcel") as HTMLInputElement)?.value;
+                        let tipoPersona = (document.getElementById("tippers") as HTMLInputElement)?.value;
+                        if(tipoPersona=="empleador"){
+                            
+                        }
+                        if (nombre == "" || nombre == null || apell1 == "" || apell1 == null || apell2 == "" || apell2 == null || dom == "" || dom == null || fecnac == "" || fecnac == null
+                            || sueldo == "" || sueldo == null || numcel == "" || numcel == null || tipoPersona == "" || tipoPersona == null) {
+                            alert("Todos los campos son requeridos");
 
-                    }
-                    else {
-                        insercion(nombre, apell1, apell2, dom, fecnac, sueldo, numcel, tipoPersona);
-                    }
+                        }
+                        else {
+                            insercion(nombre, apell1, apell2, dom, fecnac, sueldo, numcel, tipoPersona);
+                        }
 
-                }} className="ion-margin-top" expand="block">
-                    Ingresar
-                </IonButton>
-
+                    }}>
+                        Ingresar
+                    </IonButton>
+                </IonRow>
             </IonContent>
         </IonPage>
     );

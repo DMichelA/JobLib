@@ -4,4 +4,5 @@
     <string name="title_activity_main">joblib</string>
     <string name="package_name">io.ionic.starter</string>
     <string name="custom_url_scheme">io.ionic.starter</string>
+    <string name="server_client_id">146361808800-r5p9ulau45k2nic9un8a31aeble56qe4.apps.googleusercontent.com</string>
 </resources>
